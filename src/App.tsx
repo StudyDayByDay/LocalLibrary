@@ -1,10 +1,40 @@
-import {useState} from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import './App.css';
+import styled from 'styled-components';
+import add from './assets/add.svg';
+import edit from './assets/edit.svg';
+
+const Obsidian = styled.div`
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 4fr;
+  grid-template-rows: auto;
+  column-gap: 20px;
+  padding: 20px;
+  .left {
+    display: flex;
+    flex-direction: column;
+    /* background-color: pink; */
+    .tabBar {
+      padding: 10px 20px;
+      border: 1px solid #ccc;
+      border-radius: 25px;
+    }
+    .tree {
+      flex: 1;
+      padding: 20px;
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      border-radius: 25px;
+    }
+  }
+  .right {
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+  }
+`;
 
 function App() {
-  const [count, setCount] = useState(0);
   const visitFold = async () => {
     const dirHandle = await window.showDirectoryPicker({mode: 'readwrite'});
     console.log(dirHandle);
@@ -21,24 +51,16 @@ function App() {
   };
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>count is {count}</button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">Click on the Vite and React logos to learn more</p>
-      <button onClick={visitFold}>点击访问文件夹</button>
-      <button onClick={visitFile}>点击访问文件</button>
+      <Obsidian>
+        <div className="left">
+          <div className="tabBar">
+            <img src={add} title="新增文件" />
+            <img src={edit} title="新增文件" />
+          </div>
+          <div className="tree">文件树</div>
+        </div>
+        <div className="right">文件详情</div>
+      </Obsidian>
     </>
   );
 }
