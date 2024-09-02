@@ -9,7 +9,7 @@ const Obsidian = styled.div`
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-columns: 1fr 4fr;
+  grid-template-columns: 1fr 3fr;
   grid-template-rows: auto;
   column-gap: 20px;
   padding: 20px;
@@ -48,14 +48,14 @@ const Obsidian = styled.div`
       margin-top: 20px;
       border: 1px solid #ccc;
       border-radius: 25px;
-      &:has(img:hover) {
+      &:has(.none:hover) {
         /* background-color: #b3b0b0; */
         border: 2px dashed #1e5cca;
       }
       &:hover {
         border: 1px solid #1e5cca;
       }
-      img {
+      .none {
         position: absolute;
         top: 50%;
         left: 50%;
@@ -75,31 +75,22 @@ const Obsidian = styled.div`
 `;
 
 function App() {
-  const visitFold = async () => {
-    const dirHandle = await window.showDirectoryPicker({mode: 'readwrite'});
-    console.log(dirHandle);
-    const keys = dirHandle.keys();
-    console.log(keys);
-    for await (const element of keys) {
-      console.log(element, 'element');
-    }
-  };
-
-  const visitFile = async () => {
-    const res = await window.showOpenFilePicker();
-    console.log(res[0].getFile().then(console.log), 'res');
-  };
   const [chooseStatus, setChooseStatus] = useState(false);
-  const directoryToArray = async function (dirHandle) {
+  const [treeData, setTreeData] = useState([]);
+
+  const directoryToArray = async function (dirHandle: FileSystemDirectoryHandle) {
     const result = [];
 
     for await (const entry of dirHandle.values()) {
+      if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === 'dist') {
+        continue;
+      }
       if (entry.kind === 'directory') {
         const subDirHandle = await dirHandle.getDirectoryHandle(entry.name);
         result.push({
           name: entry.name,
           type: 'directory',
-          contents: await directoryToArray(subDirHandle), // 递归处理子目录
+          children: await directoryToArray(subDirHandle), // 递归处理子目录
         });
       } else if (entry.kind === 'file') {
         result.push({
@@ -116,14 +107,13 @@ function App() {
     try {
       const dirHandle = await window.showDirectoryPicker(); // 选择文件夹
       const directoryArray = await directoryToArray(dirHandle);
-      console.log(JSON.stringify(directoryArray, null, 2)); // 打印结果
+      setTreeData(directoryArray);
+      setChooseStatus(true);
+      console.log(JSON.stringify(directoryArray, null, 2), 111); // 打印结果
     } catch (error) {
       console.error('Error accessing directory:', error);
     }
   };
-
-  // 调用函数
-  selectDirectory();
 
   return (
     <>
@@ -137,7 +127,7 @@ function App() {
               <img src={add} title="新增文件夹" />
             </div>
           </div>
-          <div className="tree">{chooseStatus ? <FileTree /> : <img src={addStatus} onClick={selectDirectory} />}</div>
+          <div className="tree">{chooseStatus ? <FileTree treeData={treeData} /> : <img className="none" src={addStatus} onClick={selectDirectory} />}</div>
         </div>
         <div className="right">文件详情</div>
       </Obsidian>
