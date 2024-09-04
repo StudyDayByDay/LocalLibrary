@@ -1,7 +1,8 @@
 import {useState} from 'react';
 import styled from 'styled-components';
-import treeMinus from '@/assets/images/tree-minus.png';
-import treeAdd from '@/assets/images/tree-add.png';
+import folder from '@/assets/svg/file-folder.svg';
+import folderOpen from '@/assets/svg/file-folder-open.svg';
+import SvgIcon from '../SvgIcon';
 
 const TreeNodeBox = styled.div`
   &[data-type='node'] {
@@ -36,17 +37,23 @@ const TreeNodeBox = styled.div`
         display: none;
       }
       .content {
-        transform: translateY(4px);
+        transform: translateY(8px);
         margin-top: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
         img {
-          width: 11px;
-          height: 11px;
-          cursor: pointer;
-          transform: translateX(-4px);
+          width: 22px;
+          height: 22px;
+          transform: translateX(-8px);
         }
         .text {
-          margin-left: 8px;
-          cursor: pointer;
+          /* margin-left: 4px; */
+          user-select: none;
+          font-size: 14px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
           &:hover {
             color: rgb(40, 121, 218);
           }
@@ -89,8 +96,8 @@ export default function TreeNode(props: Props) {
       <div className="tree-title">
         <div className="tree-title-content">
           <div className="line"></div>
-          <div className="content">
-            {node.children ? <img src={showChild ? treeMinus : treeAdd} onClick={handleChange} /> : null}
+          <div className="content" onClick={handleChange}>
+            {node.children ? <img src={showChild ? folderOpen : folder} /> : <SvgIcon fileName={node.name} />}
             <span className="text">{node.name}</span>
           </div>
         </div>
