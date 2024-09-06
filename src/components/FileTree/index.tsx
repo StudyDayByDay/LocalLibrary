@@ -1,10 +1,5 @@
 import TreeNode from './components/TreeNode';
-
-interface TreeData {
-  name: string;
-  type: string;
-  children?: TreeData[];
-}
+import type {TreeData} from '@/types/fileTree';
 
 export default function FileTree({treeData}: {treeData: TreeData[]}) {
   const handleLastParent = (index: number, arr: TreeData[]) => {

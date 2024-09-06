@@ -4,6 +4,7 @@ import edit from './assets/svg/edit.svg';
 import addStatus from './assets/svg/addStatus.svg';
 import FileTree from './components/FileTree';
 import {useState} from 'react';
+import {handleSortFiles} from '@/utils/index.ts';
 
 const Obsidian = styled.div`
   width: 100%;
@@ -82,9 +83,6 @@ function App() {
     const result = [];
 
     for await (const entry of dirHandle.values()) {
-      if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === 'dist') {
-        continue;
-      }
       if (entry.kind === 'directory') {
         const subDirHandle = await dirHandle.getDirectoryHandle(entry.name);
         result.push({
@@ -107,6 +105,8 @@ function App() {
     try {
       const dirHandle = await window.showDirectoryPicker(); // 选择文件夹
       const directoryArray = await directoryToArray(dirHandle);
+      // 将内容排序
+      handleSortFiles(directoryArray);
       setTreeData(directoryArray);
       setChooseStatus(true);
       console.log(JSON.stringify(directoryArray, null, 2), 111); // 打印结果

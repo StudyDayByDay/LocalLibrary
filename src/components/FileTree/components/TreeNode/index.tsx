@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import folder from '@/assets/svg/file-folder.svg';
 import folderOpen from '@/assets/svg/file-folder-open.svg';
 import SvgIcon from '../SvgIcon';
+import type {Props} from '@/types/fileTree';
 
 const TreeNodeBox = styled.div`
   &[data-type='node'] {
@@ -69,18 +70,6 @@ const TreeNodeBox = styled.div`
     }
   }
 `;
-
-interface TreeData {
-  name: string;
-  type: string;
-  children?: TreeData[];
-}
-
-interface Props {
-  node: TreeData;
-  dataType: string;
-  nodeType: string;
-}
 
 export default function TreeNode(props: Props) {
   const {node, dataType, nodeType} = props;
