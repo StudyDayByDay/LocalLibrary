@@ -1,7 +1,7 @@
 import TreeNode from './components/TreeNode';
-import type {TreeData} from '@/types/fileTree';
+import type {TreeData, getFile} from '@/types/fileTree';
 
-export default function FileTree({treeData}: {treeData: TreeData[]}) {
+export default function FileTree({treeData, getFile}: {treeData: TreeData[]; getFile: getFile}) {
   const handleLastParent = (index: number, arr: TreeData[]) => {
     const length = arr.length - 1;
 
@@ -18,7 +18,7 @@ export default function FileTree({treeData}: {treeData: TreeData[]}) {
   return (
     <div className="tree-panel">
       {treeData.map((item, ind) => (
-        <TreeNode key={ind} node={item} dataType="" nodeType={handleLastParent(ind, treeData)} />
+        <TreeNode key={ind} node={item} dataType="" nodeType={handleLastParent(ind, treeData)} getFile={getFile} />
       ))}
     </div>
   );

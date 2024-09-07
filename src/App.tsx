@@ -2,7 +2,8 @@ import styled from 'styled-components';
 import add from './assets/svg/add.svg';
 import edit from './assets/svg/edit.svg';
 import addStatus from './assets/svg/addStatus.svg';
-import FileTree from './components/FileTree';
+import FileTree from '@/components/FileTree';
+import FileDetail from '@/components/FileDetail';
 import {useState} from 'react';
 import {handleSortFiles} from '@/utils/index.ts';
 
@@ -78,6 +79,7 @@ const Obsidian = styled.div`
 function App() {
   const [chooseStatus, setChooseStatus] = useState(false);
   const [treeData, setTreeData] = useState([]);
+  const [currentFile, setCurrentFile] = useState<File>();
 
   const directoryToArray = async function (dirHandle: FileSystemDirectoryHandle) {
     const result = [];
@@ -94,6 +96,7 @@ function App() {
         result.push({
           name: entry.name,
           type: 'file',
+          fileHandle: entry,
         });
       }
     }
@@ -103,7 +106,7 @@ function App() {
 
   const selectDirectory = async function () {
     try {
-      const dirHandle = await window.showDirectoryPicker(); // 选择文件夹
+      const dirHandle = await window.showDirectoryPicker({mode: 'readwrite'}); // 选择文件夹
       const directoryArray = await directoryToArray(dirHandle);
       // 将内容排序
       handleSortFiles(directoryArray);
@@ -113,6 +116,13 @@ function App() {
     } catch (error) {
       console.error('Error accessing directory:', error);
     }
+  };
+
+  const getFile = async (fileHandle: FileSystemFileHandle) => {
+    // 读取文件
+    const file = await fileHandle.getFile();
+    // 显示到文件详情
+    setCurrentFile(file);
   };
 
   return (
@@ -127,9 +137,11 @@ function App() {
               <img src={add} title="新增文件夹" />
             </div>
           </div>
-          <div className="tree">{chooseStatus ? <FileTree treeData={treeData} /> : <img className="none" src={addStatus} onClick={selectDirectory} />}</div>
+          <div className="tree">{chooseStatus ? <FileTree treeData={treeData} getFile={getFile} /> : <img className="none" src={addStatus} onClick={selectDirectory} />}</div>
         </div>
-        <div className="right">文件详情</div>
+        <div className="right">
+          <FileDetail file={currentFile} />
+        </div>
       </Obsidian>
     </>
   );

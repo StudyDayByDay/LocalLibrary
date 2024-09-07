@@ -72,11 +72,15 @@ const TreeNodeBox = styled.div`
 `;
 
 export default function TreeNode(props: Props) {
-  const {node, dataType, nodeType} = props;
+  const {node, dataType, nodeType, getFile} = props;
   const [showChild, setShowChild] = useState(false);
 
-  const handleChange = () => {
+  const handleClick = async () => {
     setShowChild(!showChild);
+    if (node.fileHandle) {
+      // 读取文件
+      getFile(node.fileHandle);
+    }
   };
   return (
     // data-type='node'表示是被渲染的子集，最左边需要加边框
@@ -85,7 +89,7 @@ export default function TreeNode(props: Props) {
       <div className="tree-title">
         <div className="tree-title-content">
           <div className="line"></div>
-          <div className="content" onClick={handleChange}>
+          <div className="content" onClick={handleClick}>
             {node.children ? <img src={showChild ? folderOpen : folder} /> : <SvgIcon fileName={node.name} />}
             <span className="text">{node.name}</span>
           </div>
@@ -95,7 +99,7 @@ export default function TreeNode(props: Props) {
         <div className="tree-content">
           <div className="nodes">
             {node.children.map((ite, i) => (
-              <TreeNode dataType="node" key={i} node={ite} nodeType={i === node.children!.length - 1 ? 'lastParent' : ''} />
+              <TreeNode dataType="node" key={i} node={ite} nodeType={i === node.children!.length - 1 ? 'lastParent' : ''} getFile={getFile} />
             ))}
           </div>
         </div>
