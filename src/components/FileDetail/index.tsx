@@ -1,7 +1,13 @@
 import {useEffect, useState} from 'react';
 import styled from 'styled-components';
+import Editor from '@/components/FileDetail/components/Editor';
+import {getEditorTypeByFileSuffix} from '@/utils';
 
-const FileDetailBox = styled.div``;
+const FileDetailBox = styled.div`
+  white-space: pre;
+  width: 100%;
+  height: 100%;
+`;
 
 export default function FileDetail({file}: {file: File}) {
   const [content, setContent] = useState('');
@@ -15,5 +21,5 @@ export default function FileDetail({file}: {file: File}) {
       getContent();
     }
   }, [file]);
-  return <FileDetailBox>{content}</FileDetailBox>;
+  return <FileDetailBox>{content ? <Editor value={content} language={getEditorTypeByFileSuffix(file.name)} /> : null}</FileDetailBox>;
 }

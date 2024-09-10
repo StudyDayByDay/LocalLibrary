@@ -43,3 +43,93 @@ export function handleSortFiles(arr: TreeData[]) {
   // 对文件夹排序
   handleSortByFolderName(arr);
 }
+
+export function getEditorTypeByFileSuffix(fileName: string) {
+  const arr = fileName.split('.');
+  const suffix = arr[arr.length - 1];
+  const fileExtensionsToLanguages: {
+    [key: string]: string;
+  } = {
+    abap: 'abap',
+    apex: 'apex',
+    azcli: 'azcli',
+    bat: 'bat', // Batch script (.bat)
+    bicep: 'bicep',
+    c: 'c',
+    mligo: 'cameligo',
+    clj: 'clojure',
+    coffee: 'coffee',
+    cpp: 'cpp', // C++ (.cpp)
+    cs: 'csharp', // C# (.cs)
+    csp: 'csp',
+    css: 'css',
+    dart: 'dart',
+    dockerfile: 'dockerfile', // Dockerfile
+    ecl: 'ecl',
+    ex: 'elixir',
+    exs: 'elixir',
+    erl: 'erlang',
+    flow: 'flow',
+    fs: 'fsharp', // F# (.fs, .fsi)
+    fsi: 'fsharp',
+    go: 'go',
+    graphql: 'graphql', // GraphQL (.graphql, .gql)
+    gql: 'graphql',
+    hbs: 'handlebars', // Handlebars (.hbs)
+    handlebars: 'handlebars',
+    hcl: 'hcl',
+    html: 'html',
+    htm: 'html', // HTML (.html, .htm)
+    ini: 'ini',
+    java: 'java',
+    js: 'javascript', // JavaScript (.js, .mjs)
+    mjs: 'javascript',
+    json: 'json',
+    jl: 'julia', // Julia (.jl)
+    kt: 'kotlin', // Kotlin (.kt, .kts)
+    kts: 'kotlin',
+    less: 'less',
+    lex: 'lexon',
+    lua: 'lua',
+    md: 'markdown', // Markdown (.md)
+    s: 'mips', // MIPS (.s, .asm)
+    asm: 'mips',
+    dax: 'msdax',
+    sql: 'mysql', // MySQL (.sql), also used for PostgreSQL, Redshift, etc.
+    m: 'objectivec', // Objective-C (.m)
+    mm: 'objectivec',
+    pas: 'pascal', // Pascal (.pas, .pp)
+    pp: 'pascal',
+    pl: 'perl', // Perl (.pl, .pm)
+    pm: 'perl',
+    cshtml: 'razor', // Razor (.cshtml)
+    redis: 'redis',
+    rst: 'restructuredtext', // reStructuredText (.rst)
+    rb: 'ruby', // Ruby (.rb)
+    rs: 'rust', // Rust (.rs)
+    sb: 'sb',
+    scala: 'scala',
+    scm: 'scheme', // Scheme (.scm)
+    scss: 'scss',
+    sh: 'shell', // Shell (.sh, .bash, .zsh)
+    bash: 'shell',
+    zsh: 'shell',
+    sol: 'solidity', // Solidity (.sol)
+    aes: 'sophia',
+    rq: 'sparql', // SPARQL (.rq, .sparql)
+    sparql: 'sparql',
+    st: 'st',
+    swift: 'swift', // Swift (.swift)
+    sv: 'systemverilog', // SystemVerilog (.sv, .svh)
+    svh: 'systemverilog',
+    tcl: 'tcl',
+    twig: 'twig', // Twig (.twig)
+    ts: 'typescript', // TypeScript (.ts, .tsx)
+    tsx: 'typescript',
+    vb: 'vb',
+    xml: 'xml', // XML (.xml)
+    yaml: 'yaml', // YAML (.yaml, .yml)
+    yml: 'yaml',
+  };
+  return suffix in fileExtensionsToLanguages ? fileExtensionsToLanguages[suffix] : 'txt';
+}

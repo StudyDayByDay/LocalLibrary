@@ -12,13 +12,12 @@ const Obsidian = styled.div`
   height: 100%;
   display: grid;
   grid-template-columns: 1fr 3fr;
-  grid-template-rows: auto;
+  grid-template-rows: 100%;
   column-gap: 20px;
   padding: 20px;
   .left {
     display: flex;
     flex-direction: column;
-    /* background-color: pink; */
     .tabBar {
       display: flex;
       justify-content: flex-end;
@@ -29,6 +28,9 @@ const Obsidian = styled.div`
       border-radius: 25px;
       &:hover {
         border: 1px solid #1e5cca;
+      }
+      .title {
+        margin-right: auto;
       }
       .icon {
         padding: 5px;
@@ -50,6 +52,13 @@ const Obsidian = styled.div`
       margin-top: 20px;
       border: 1px solid #ccc;
       border-radius: 25px;
+      overflow: auto;
+      scrollbar-width: none; /* Firefox 隐藏滚动条 */
+      -ms-overflow-style: none; /* IE 和 Edge 隐藏滚动条 */
+      &::-webkit-scrollbar {
+        display: none; /* Chrome、Safari 隐藏滚动条 */
+      }
+
       &:has(.none:hover) {
         /* background-color: #b3b0b0; */
         border: 2px dashed #1e5cca;
@@ -70,6 +79,12 @@ const Obsidian = styled.div`
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 25px;
+    overflow: auto;
+    scrollbar-width: none; /* Firefox 隐藏滚动条 */
+    -ms-overflow-style: none; /* IE 和 Edge 隐藏滚动条 */
+    &::-webkit-scrollbar {
+      display: none; /* Chrome、Safari 隐藏滚动条 */
+    }
     &:hover {
       border: 1px solid #1e5cca;
     }
@@ -80,6 +95,7 @@ function App() {
   const [chooseStatus, setChooseStatus] = useState(false);
   const [treeData, setTreeData] = useState([]);
   const [currentFile, setCurrentFile] = useState<File>();
+  const [currentFolder, setCurrentFolder] = useState<FileSystemDirectoryHandle>();
 
   const directoryToArray = async function (dirHandle: FileSystemDirectoryHandle) {
     const result = [];
@@ -107,6 +123,7 @@ function App() {
   const selectDirectory = async function () {
     try {
       const dirHandle = await window.showDirectoryPicker({mode: 'readwrite'}); // 选择文件夹
+      setCurrentFolder(dirHandle);
       const directoryArray = await directoryToArray(dirHandle);
       // 将内容排序
       handleSortFiles(directoryArray);
@@ -121,6 +138,7 @@ function App() {
   const getFile = async (fileHandle: FileSystemFileHandle) => {
     // 读取文件
     const file = await fileHandle.getFile();
+    console.log(file);
     // 显示到文件详情
     setCurrentFile(file);
   };
@@ -130,6 +148,7 @@ function App() {
       <Obsidian>
         <div className="left">
           <div className="tabBar">
+            <div className="title">{currentFolder?.name}</div>
             <div className="icon">
               <img src={edit} title="新增文件" />
             </div>
