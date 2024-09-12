@@ -1,9 +1,10 @@
-import {useState} from 'react';
+import {useContext, useState} from 'react';
 import styled from 'styled-components';
 import folder from '@/assets/svg/file-folder.svg';
 import folderOpen from '@/assets/svg/file-folder-open.svg';
 import SvgIcon from '../SvgIcon';
 import type {Props} from '@/types/fileTree';
+import FileContext from '@/context/FileContext';
 
 const TreeNodeBox = styled.div`
   &[data-type='node'] {
@@ -43,6 +44,7 @@ const TreeNodeBox = styled.div`
         cursor: pointer;
         display: flex;
         align-items: center;
+        width: 100%;
         img {
           width: 22px;
           height: 22px;
@@ -72,8 +74,9 @@ const TreeNodeBox = styled.div`
 `;
 
 export default function TreeNode(props: Props) {
-  const {node, dataType, nodeType, getFile} = props;
+  const {node, dataType, nodeType} = props;
   const [showChild, setShowChild] = useState(false);
+  const {getFile} = useContext(FileContext);
 
   const handleClick = async () => {
     setShowChild(!showChild);
@@ -89,7 +92,7 @@ export default function TreeNode(props: Props) {
       <div className="tree-title">
         <div className="tree-title-content">
           <div className="line"></div>
-          <div className="content" onClick={handleClick}>
+          <div className="content" onClick={handleClick} title={node.name}>
             {node.children ? <img src={showChild ? folderOpen : folder} /> : <SvgIcon fileName={node.name} />}
             <span className="text">{node.name}</span>
           </div>
@@ -99,7 +102,7 @@ export default function TreeNode(props: Props) {
         <div className="tree-content">
           <div className="nodes">
             {node.children.map((ite, i) => (
-              <TreeNode dataType="node" key={i} node={ite} nodeType={i === node.children!.length - 1 ? 'lastParent' : ''} getFile={getFile} />
+              <TreeNode dataType="node" key={i} node={ite} nodeType={i === node.children!.length - 1 ? 'lastParent' : ''} />
             ))}
           </div>
         </div>

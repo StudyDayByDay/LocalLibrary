@@ -11,5 +11,10 @@ export interface Props {
   node: TreeData;
   dataType: string;
   nodeType: string;
+}
+
+export interface FC {
+  currentFile?: File;
+  fileHandle?: FileSystemFileHandle;
   getFile: getFile;
 }

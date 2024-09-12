@@ -6,6 +6,7 @@ import FileTree from '@/components/FileTree';
 import FileDetail from '@/components/FileDetail';
 import {useState} from 'react';
 import {handleSortFiles} from '@/utils/index.ts';
+import FileContext from '@/context/FileContext';
 
 const Obsidian = styled.div`
   width: 100%;
@@ -96,6 +97,7 @@ function App() {
   const [treeData, setTreeData] = useState([]);
   const [currentFile, setCurrentFile] = useState<File>();
   const [currentFolder, setCurrentFolder] = useState<FileSystemDirectoryHandle>();
+  const [fileHandle, setFileHandle] = useState<FileSystemFileHandle>();
 
   const directoryToArray = async function (dirHandle: FileSystemDirectoryHandle) {
     const result = [];
@@ -138,30 +140,33 @@ function App() {
   const getFile = async (fileHandle: FileSystemFileHandle) => {
     // 读取文件
     const file = await fileHandle.getFile();
-    console.log(file);
     // 显示到文件详情
     setCurrentFile(file);
+    // 保存文件访问句柄
+    setFileHandle(fileHandle);
   };
 
   return (
     <>
-      <Obsidian>
-        <div className="left">
-          <div className="tabBar">
-            <div className="title">{currentFolder?.name}</div>
-            <div className="icon">
-              <img src={edit} title="新增文件" />
+      <FileContext.Provider value={{currentFile, fileHandle, getFile}}>
+        <Obsidian>
+          <div className="left">
+            <div className="tabBar">
+              <div className="title">{currentFolder?.name}</div>
+              <div className="icon">
+                <img src={edit} title="新增文件" />
+              </div>
+              <div className="icon">
+                <img src={add} title="新增文件夹" />
+              </div>
             </div>
-            <div className="icon">
-              <img src={add} title="新增文件夹" />
-            </div>
+            <div className="tree">{chooseStatus ? <FileTree treeData={treeData} /> : <img className="none" src={addStatus} onClick={selectDirectory} />}</div>
           </div>
-          <div className="tree">{chooseStatus ? <FileTree treeData={treeData} getFile={getFile} /> : <img className="none" src={addStatus} onClick={selectDirectory} />}</div>
-        </div>
-        <div className="right">
-          <FileDetail file={currentFile} />
-        </div>
-      </Obsidian>
+          <div className="right">
+            <FileDetail file={currentFile} />
+          </div>
+        </Obsidian>
+      </FileContext.Provider>
     </>
   );
 }
