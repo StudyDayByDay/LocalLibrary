@@ -18,7 +18,6 @@ export default function Editor({value, language}: {value: string; language: stri
     console.log(code);
     await writeableStream?.write(code);
     await writeableStream?.close();
-    alert('保存成功');
   };
 
   useEffect(() => {
@@ -39,18 +38,9 @@ export default function Editor({value, language}: {value: string; language: stri
       },
     });
 
-    // editor.onDidChangeModelContent((event) => {
-    //   console.log('Content changed:');
-    // });
-
-    editorRef.current?.addEventListener('keydown', (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-        event.preventDefault(); // 阻止浏览器的默认保存行为
-        // 执行保存操作
-        saveFile(editor);
-      }
+    editor.onDidChangeModelContent(() => {
+      saveFile(editor);
     });
-
     return () => {
       editor.dispose();
     };

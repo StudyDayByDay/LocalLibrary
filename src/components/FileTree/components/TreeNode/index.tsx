@@ -61,6 +61,10 @@ const TreeNodeBox = styled.div`
             color: rgb(40, 121, 218);
           }
         }
+        .selected {
+          font-weight: bold;
+          color: rgb(40, 121, 218);
+        }
       }
     }
   }
@@ -76,7 +80,7 @@ const TreeNodeBox = styled.div`
 export default function TreeNode(props: Props) {
   const {node, dataType, nodeType} = props;
   const [showChild, setShowChild] = useState(false);
-  const {getFile} = useContext(FileContext);
+  const {currentFile, getFile} = useContext(FileContext);
 
   const handleClick = async () => {
     setShowChild(!showChild);
@@ -94,7 +98,7 @@ export default function TreeNode(props: Props) {
           <div className="line"></div>
           <div className="content" onClick={handleClick} title={node.name}>
             {node.children ? <img src={showChild ? folderOpen : folder} /> : <SvgIcon fileName={node.name} />}
-            <span className="text">{node.name}</span>
+            <span className={node.name === currentFile?.name ? 'text selected' : 'text'}>{node.name}</span>
           </div>
         </div>
       </div>

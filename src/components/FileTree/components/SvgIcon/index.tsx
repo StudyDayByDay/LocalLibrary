@@ -43,5 +43,5 @@ export default function SvgIcon({fileName}: {fileName: string}) {
     const suffix = arr[arr.length - 1];
     return suffix in svgMap ? svgMap[suffix] : none;
   };
-  return <img src={getSvgBySuffix(fileName)} />;
+  return <img style={{width: '22px', height: '22px'}} src={getSvgBySuffix(fileName)} />;
 }
