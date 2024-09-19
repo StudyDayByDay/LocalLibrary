@@ -1,4 +1,4 @@
-import type {TreeData} from '@/types/fileTree';
+import type {TreeData, TreeNodeType} from '@/types/fileTree';
 
 // 处理所有文件、文件夹
 const handleSortByName = (arr: TreeData[]) => {
@@ -141,7 +141,7 @@ export async function handleDirectoryToArray(dirHandle: FileSystemDirectoryHandl
       const subDirHandle = await dirHandle.getDirectoryHandle(entry.name);
       result.push({
         name: entry.name,
-        type: 'directory',
+        type: 'directory' as TreeNodeType,
         children: [],
         handle: subDirHandle,
         parentHandle: dirHandle,
@@ -149,7 +149,7 @@ export async function handleDirectoryToArray(dirHandle: FileSystemDirectoryHandl
     } else if (entry.kind === 'file') {
       result.push({
         name: entry.name,
-        type: 'file',
+        type: 'file' as TreeNodeType,
         handle: entry,
         parentHandle: dirHandle,
       });

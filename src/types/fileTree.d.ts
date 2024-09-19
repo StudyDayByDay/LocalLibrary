@@ -1,6 +1,7 @@
+export type TreeNodeType = 'file' | 'directory' | 'fileEdit' | 'directoryEdit';
 export interface TreeData {
   name: string;
-  type: string;
+  type: TreeNodeType;
   handle: FileSystemFileHandle | FileSystemDirectoryHandle;
   children?: TreeData[];
   parentHandle: FileSystemDirectoryHandle;

@@ -100,6 +100,7 @@ function App() {
   const [currentGlobalFolder, setCurrentGlobalFolder] = useState<FileSystemDirectoryHandle>();
   const [currentNode, setCurrentNode] = useState<TreeData>();
 
+  // 选择初始文件
   const selectDirectory = async function () {
     try {
       const dirHandle = await window.showDirectoryPicker({mode: 'readwrite'}); // 选择文件夹
@@ -113,6 +114,7 @@ function App() {
     }
   };
 
+  // 设定当前选中的node
   const handleSetCurrentNode = async (currentNode: TreeData) => {
     // 读取文件
     if (currentNode.handle.kind === 'file') {
@@ -125,6 +127,33 @@ function App() {
     setCurrentNode(currentNode);
   };
 
+  // 新增文件操作
+  const handleAddFile = () => {
+    setTreeData([
+      ...treeData,
+      {
+        name: 'addFile.null',
+        type: 'fileEdit',
+        handle: currentGlobalFolder!,
+        parentHandle: currentGlobalFolder!,
+      },
+    ]);
+  };
+
+  // 新增文件夹操作
+  const handleAddDirectory = () => {
+    setTreeData([
+      ...treeData,
+      {
+        name: 'addDirectory.null',
+        type: 'directoryEdit',
+        handle: currentGlobalFolder!,
+        children: [],
+        parentHandle: currentGlobalFolder!,
+      },
+    ]);
+  };
+
   return (
     <>
       <FileContext.Provider value={{currentFile, currentNode, handleSetCurrentNode}}>
@@ -132,10 +161,10 @@ function App() {
           <div className="left">
             <div className="tabBar">
               <div className="title">{currentGlobalFolder?.name}</div>
-              <div className="icon">
+              <div className="icon" onClick={handleAddFile}>
                 <img src={edit} title="新增文件" />
               </div>
-              <div className="icon">
+              <div className="icon" onClick={handleAddDirectory}>
                 <img src={add} title="新增文件夹" />
               </div>
             </div>

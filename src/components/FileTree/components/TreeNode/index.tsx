@@ -1,4 +1,4 @@
-import {useContext, useState} from 'react';
+import {useContext, useState, useRef, useEffect} from 'react';
 import styled from 'styled-components';
 import folder from '@/assets/svg/file-folder.svg';
 import folderOpen from '@/assets/svg/file-folder-open.svg';
@@ -82,10 +82,30 @@ export default function TreeNode(props: Props) {
   const [showChild, setShowChild] = useState(false);
   const {currentNode, handleSetCurrentNode} = useContext(FileContext);
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const handleClick = async () => {
     handleSetCurrentNode(node);
     setShowChild(!showChild);
   };
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
+  const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      // 处理回车事件
+      console.log('回车');
+    }
+  };
+
+  const handleBlur = () => {
+    console.log('失焦');
+  };
+
   return (
     // data-type='node'表示是被渲染的子集，最左边需要加边框
     // node-type='lastParent'表示是最后的父级，需要去除父级边框
@@ -93,10 +113,17 @@ export default function TreeNode(props: Props) {
       <div className="tree-title">
         <div className="tree-title-content">
           <div className="line"></div>
-          <div className="content" onClick={handleClick} title={node.name}>
-            {node.children ? <img src={showChild ? folderOpen : folder} /> : <SvgIcon fileName={node.name} />}
-            <span className={node === currentNode ? 'text selected' : 'text'}>{node.name}</span>
-          </div>
+          {node.type === 'fileEdit' || node.type === 'directoryEdit' ? (
+            <div className="content">
+              {node.children ? <img src={showChild ? folderOpen : folder} /> : <SvgIcon fileName={node.name} />}
+              <input type="text" ref={inputRef} onKeyDown={handleEnter} onBlur={handleBlur} />
+            </div>
+          ) : (
+            <div className="content" onClick={handleClick} title={node.name}>
+              {node.children ? <img src={showChild ? folderOpen : folder} /> : <SvgIcon fileName={node.name} />}
+              <span className={node === currentNode ? 'text selected' : 'text'}>{node.name}</span>
+            </div>
+          )}
         </div>
       </div>
       {node.children?.length && showChild ? (
