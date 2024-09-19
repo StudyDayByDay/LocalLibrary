@@ -5,8 +5,9 @@ import addStatus from './assets/svg/addStatus.svg';
 import FileTree from '@/components/FileTree';
 import FileDetail from '@/components/FileDetail';
 import {useState} from 'react';
-import {handleSortFiles} from '@/utils/index.ts';
+import {handleDirectoryToArray} from '@/utils/index.ts';
 import FileContext from '@/context/FileContext';
+import {TreeData} from '@/types/fileTree';
 
 const Obsidian = styled.div`
   width: 100%;
@@ -94,41 +95,16 @@ const Obsidian = styled.div`
 
 function App() {
   const [chooseStatus, setChooseStatus] = useState(false);
-  const [treeData, setTreeData] = useState([]);
+  const [treeData, setTreeData] = useState<TreeData[]>([]);
   const [currentFile, setCurrentFile] = useState<File>();
-  const [currentFolder, setCurrentFolder] = useState<FileSystemDirectoryHandle>();
-  const [fileHandle, setFileHandle] = useState<FileSystemFileHandle>();
-
-  const directoryToArray = async function (dirHandle: FileSystemDirectoryHandle) {
-    const result = [];
-
-    for await (const entry of dirHandle.values()) {
-      if (entry.kind === 'directory') {
-        const subDirHandle = await dirHandle.getDirectoryHandle(entry.name);
-        result.push({
-          name: entry.name,
-          type: 'directory',
-          children: await directoryToArray(subDirHandle), // 递归处理子目录
-        });
-      } else if (entry.kind === 'file') {
-        result.push({
-          name: entry.name,
-          type: 'file',
-          fileHandle: entry,
-        });
-      }
-    }
-
-    return result;
-  };
+  const [currentGlobalFolder, setCurrentGlobalFolder] = useState<FileSystemDirectoryHandle>();
+  const [currentNode, setCurrentNode] = useState<TreeData>();
 
   const selectDirectory = async function () {
     try {
       const dirHandle = await window.showDirectoryPicker({mode: 'readwrite'}); // 选择文件夹
-      setCurrentFolder(dirHandle);
-      const directoryArray = await directoryToArray(dirHandle);
-      // 将内容排序
-      handleSortFiles(directoryArray);
+      setCurrentGlobalFolder(dirHandle);
+      const directoryArray = await handleDirectoryToArray(dirHandle);
       setTreeData(directoryArray);
       setChooseStatus(true);
       console.log(JSON.stringify(directoryArray, null, 2), 111); // 打印结果
@@ -137,22 +113,25 @@ function App() {
     }
   };
 
-  const getFile = async (fileHandle: FileSystemFileHandle) => {
+  const handleSetCurrentNode = async (currentNode: TreeData) => {
     // 读取文件
-    const file = await fileHandle.getFile();
-    // 显示到文件详情
-    setCurrentFile(file);
-    // 保存文件访问句柄
-    setFileHandle(fileHandle);
+    if (currentNode.handle.kind === 'file') {
+      const file = await currentNode.handle.getFile();
+      setCurrentFile(file);
+    } else if (!currentNode!.children?.length) {
+      // 读取子目录
+      currentNode!.children = await handleDirectoryToArray(currentNode.handle);
+    }
+    setCurrentNode(currentNode);
   };
 
   return (
     <>
-      <FileContext.Provider value={{currentFile, fileHandle, getFile}}>
+      <FileContext.Provider value={{currentFile, currentNode, handleSetCurrentNode}}>
         <Obsidian>
           <div className="left">
             <div className="tabBar">
-              <div className="title">{currentFolder?.name}</div>
+              <div className="title">{currentGlobalFolder?.name}</div>
               <div className="icon">
                 <img src={edit} title="新增文件" />
               </div>

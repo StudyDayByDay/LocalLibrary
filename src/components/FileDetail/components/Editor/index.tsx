@@ -10,12 +10,12 @@ const EditorBox = styled.div`
 
 export default function Editor({value, language}: {value: string; language: string}) {
   const editorRef = useRef<HTMLDivElement>(null);
-  const {fileHandle} = useContext(FileContext);
+  const {currentNode} = useContext(FileContext);
 
   const saveFile = async (editor: monaco.editor.IStandaloneCodeEditor) => {
     const code = editor.getValue();
-    const writeableStream = await fileHandle?.createWritable();
-    console.log(code);
+    const handle = currentNode?.handle as FileSystemFileHandle;
+    const writeableStream = await handle.createWritable();
     await writeableStream?.write(code);
     await writeableStream?.close();
   };

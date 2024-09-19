@@ -1,11 +1,12 @@
 export interface TreeData {
   name: string;
   type: string;
-  fileHandle?: FileSystemFileHandle;
+  handle: FileSystemFileHandle | FileSystemDirectoryHandle;
   children?: TreeData[];
+  parentHandle: FileSystemDirectoryHandle;
 }
 
-export type getFile = (fileHandle: FileSystemFileHandle) => void;
+export type handleSetCurrentNode = (currentNode: TreeData) => void;
 
 export interface Props {
   node: TreeData;
@@ -15,6 +16,6 @@ export interface Props {
 
 export interface FC {
   currentFile?: File;
-  fileHandle?: FileSystemFileHandle;
-  getFile: getFile;
+  currentNode?: TreeData;
+  handleSetCurrentNode: handleSetCurrentNode;
 }

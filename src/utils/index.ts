@@ -133,3 +133,28 @@ export function getEditorTypeByFileSuffix(fileName: string) {
   };
   return suffix in fileExtensionsToLanguages ? fileExtensionsToLanguages[suffix] : 'txt';
 }
+
+export async function handleDirectoryToArray(dirHandle: FileSystemDirectoryHandle) {
+  const result = [];
+  for await (const entry of dirHandle.values()) {
+    if (entry.kind === 'directory') {
+      const subDirHandle = await dirHandle.getDirectoryHandle(entry.name);
+      result.push({
+        name: entry.name,
+        type: 'directory',
+        children: [],
+        handle: subDirHandle,
+        parentHandle: dirHandle,
+      });
+    } else if (entry.kind === 'file') {
+      result.push({
+        name: entry.name,
+        type: 'file',
+        handle: entry,
+        parentHandle: dirHandle,
+      });
+    }
+  }
+  handleSortFiles(result);
+  return result;
+}
