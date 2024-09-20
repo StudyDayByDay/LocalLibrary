@@ -8,6 +8,8 @@ export interface TreeData {
 }
 
 export type handleSetCurrentNode = (currentNode: TreeData) => void;
+export type handleHiddenFileEdit = (value: string) => void;
+export type handleHiddenDirectoryEdit = (value: string) => void;
 
 export interface Props {
   node: TreeData;
@@ -19,4 +21,6 @@ export interface FC {
   currentFile?: File;
   currentNode?: TreeData;
   handleSetCurrentNode: handleSetCurrentNode;
+  handleHiddenFileEdit: handleHiddenFileEdit;
+  handleHiddenDirectoryEdit: handleHiddenDirectoryEdit;
 }

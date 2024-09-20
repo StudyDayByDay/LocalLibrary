@@ -80,7 +80,7 @@ const TreeNodeBox = styled.div`
 export default function TreeNode(props: Props) {
   const {node, dataType, nodeType} = props;
   const [showChild, setShowChild] = useState(false);
-  const {currentNode, handleSetCurrentNode} = useContext(FileContext);
+  const {currentNode, handleSetCurrentNode, handleHiddenFileEdit, handleHiddenDirectoryEdit} = useContext(FileContext);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -93,17 +93,27 @@ export default function TreeNode(props: Props) {
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, []);
+  }, [node.type]);
 
   const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       // 处理回车事件
       console.log('回车');
+      if (node.children) {
+        handleHiddenDirectoryEdit(inputRef.current?.value as string);
+      } else {
+        handleHiddenFileEdit(inputRef.current?.value as string);
+      }
     }
   };
 
   const handleBlur = () => {
     console.log('失焦');
+    if (node.children) {
+      handleHiddenDirectoryEdit(inputRef.current?.value as string);
+    } else {
+      handleHiddenFileEdit(inputRef.current?.value as string);
+    }
   };
 
   return (

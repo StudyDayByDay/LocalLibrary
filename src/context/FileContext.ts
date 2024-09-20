@@ -7,6 +7,8 @@ const FileContext = createContext<FC>({
   // 当前选中的节点
   currentNode: undefined,
   handleSetCurrentNode() {},
+  handleHiddenFileEdit() {},
+  handleHiddenDirectoryEdit() {},
 });
 
 export default FileContext;

@@ -99,6 +99,7 @@ function App() {
   const [currentFile, setCurrentFile] = useState<File>();
   const [currentGlobalFolder, setCurrentGlobalFolder] = useState<FileSystemDirectoryHandle>();
   const [currentNode, setCurrentNode] = useState<TreeData>();
+  const [operateFlag, setOperateFlag] = useState(false);
 
   // 选择初始文件
   const selectDirectory = async function () {
@@ -127,48 +128,169 @@ function App() {
     setCurrentNode(currentNode);
   };
 
-  // 新增文件操作
-  const handleAddFile = () => {
-    setTreeData([
-      ...treeData,
-      {
-        name: 'addFile.null',
-        type: 'fileEdit',
-        handle: currentGlobalFolder!,
-        parentHandle: currentGlobalFolder!,
-      },
-    ]);
+  // 显示文件编辑框
+  const handleAddFileEdit = () => {
+    // 判断是否是全局的还是局部的
+    if (currentNode) {
+      // 局部
+      if (operateFlag) {
+        // currentNode.children?.shift();
+        currentNode.children![0].type = 'fileEdit';
+      } else {
+        currentNode.children?.unshift({
+          name: 'null',
+          type: 'fileEdit',
+          handle: currentGlobalFolder!,
+          parentHandle: currentGlobalFolder!,
+        });
+      }
+      setTreeData([...treeData]);
+    } else {
+      // 全局
+      if (operateFlag) {
+        // treeData.shift();
+        treeData[0].type = 'fileEdit';
+      } else {
+        treeData.unshift({
+          name: 'null',
+          type: 'fileEdit',
+          handle: currentGlobalFolder!,
+          parentHandle: currentGlobalFolder!,
+        });
+      }
+      setTreeData([...treeData]);
+    }
+    setOperateFlag(true);
   };
 
-  // 新增文件夹操作
-  const handleAddDirectory = () => {
-    setTreeData([
-      ...treeData,
-      {
-        name: 'addDirectory.null',
-        type: 'directoryEdit',
-        handle: currentGlobalFolder!,
-        children: [],
-        parentHandle: currentGlobalFolder!,
-      },
-    ]);
+  // 隐藏文件编辑框逻辑
+  const handleHiddenFileEdit = async (value: string) => {
+    // 判断是否是全局的还是局部的
+    if (currentNode) {
+      // 局部
+      if (value) {
+        // 新增文件逻辑
+        const handle = currentNode.children ? currentNode.handle : currentNode.parentHandle;
+        await handle.getFileHandle(value, {create: true});
+        const arr = await handleDirectoryToArray(handle as FileSystemDirectoryHandle);
+        currentNode.children = [...arr];
+        setTreeData([...treeData]);
+      } else {
+        // 回退文件编辑逻辑，文件编辑状态为false
+        currentNode.children?.shift();
+        setTreeData([...treeData]);
+      }
+    } else {
+      // 全局
+      if (value) {
+        // 新增文件逻辑
+        await currentGlobalFolder!.getFileHandle(value, {create: true});
+        const arr = await handleDirectoryToArray(currentGlobalFolder!);
+        setTreeData([...arr]);
+      } else {
+        // 回退文件编辑逻辑，文件编辑状态为false
+        treeData.shift();
+        setTreeData([...treeData]);
+      }
+    }
+    setOperateFlag(false);
+  };
+
+  // 显示文件夹编辑框
+  const handleAddDirectoryEdit = () => {
+    // 判断是否是全局的还是局部的
+    if (currentNode) {
+      // 局部
+      if (operateFlag) {
+        currentNode.children![0].type = 'directoryEdit';
+      } else {
+        currentNode.children?.unshift({
+          name: 'addDirectory.null',
+          type: 'directoryEdit',
+          handle: currentGlobalFolder!,
+          children: [],
+          parentHandle: currentGlobalFolder!,
+        });
+      }
+      setTreeData([...treeData]);
+    } else {
+      // 全局
+      if (operateFlag) {
+        // treeData.shift();
+        treeData[0].type = 'directoryEdit';
+      } else {
+        treeData.unshift({
+          name: 'null',
+          type: 'directoryEdit',
+          handle: currentGlobalFolder!,
+          children: [],
+          parentHandle: currentGlobalFolder!,
+        });
+      }
+      setTreeData([...treeData]);
+    }
+    setOperateFlag(true);
+  };
+
+  // 隐藏文件夹编辑框逻辑
+  const handleHiddenDirectoryEdit = async (value: string) => {
+    // 判断是否是全局的还是局部的
+    if (currentNode) {
+      // 局部
+      if (value) {
+        // 新增文件夹逻辑
+        const handle = currentNode.children ? currentNode.handle : currentNode.parentHandle;
+        await handle.getDirectoryHandle(value, {create: true});
+        const arr = await handleDirectoryToArray(handle as FileSystemDirectoryHandle);
+        currentNode.children = [...arr];
+        setTreeData([...treeData]);
+      } else {
+        // 回退文件编辑逻辑，文件编辑状态为false
+        currentNode.children?.shift();
+        setTreeData([...treeData]);
+      }
+    } else {
+      // 全局
+      if (value) {
+        // 新增文件夹逻辑
+        await currentGlobalFolder!.getDirectoryHandle(value, {create: true});
+        const arr = await handleDirectoryToArray(currentGlobalFolder!);
+        setTreeData([...arr]);
+      } else {
+        // 回退文件编辑逻辑，文件编辑状态为false
+        treeData.shift();
+        setTreeData([...treeData]);
+      }
+    }
+    setOperateFlag(false);
+  };
+
+  const handleTreePanelClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    // 确保只有在点击父级元素本身时才触发
+    // event.target：表示实际被点击的元素
+    // event.currentTarget：表示绑定事件的元素
+    if (event.target === event.currentTarget) {
+      setCurrentNode(undefined);
+    }
   };
 
   return (
     <>
-      <FileContext.Provider value={{currentFile, currentNode, handleSetCurrentNode}}>
+      <FileContext.Provider value={{currentFile, currentNode, handleSetCurrentNode, handleHiddenFileEdit, handleHiddenDirectoryEdit}}>
         <Obsidian>
           <div className="left">
             <div className="tabBar">
               <div className="title">{currentGlobalFolder?.name}</div>
-              <div className="icon" onClick={handleAddFile}>
+              <div className="icon" onClick={handleAddFileEdit}>
                 <img src={edit} title="新增文件" />
               </div>
-              <div className="icon" onClick={handleAddDirectory}>
+              <div className="icon" onClick={handleAddDirectoryEdit}>
                 <img src={add} title="新增文件夹" />
               </div>
             </div>
-            <div className="tree">{chooseStatus ? <FileTree treeData={treeData} /> : <img className="none" src={addStatus} onClick={selectDirectory} />}</div>
+            <div className="tree" onClick={handleTreePanelClick}>
+              {chooseStatus ? <FileTree treeData={treeData} /> : <img className="none" src={addStatus} onClick={selectDirectory} />}
+            </div>
           </div>
           <div className="right">
             <FileDetail file={currentFile} />
