@@ -10,9 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "github-markdown-css": "^5.6.1",
+    "highlight.js": "^11.10.0",
+    "marked": "^14.1.2",
     "monaco-editor": "^0.51.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "rehype": "^13.0.1",
+    "rehype-highlight": "^7.0.0",
     "styled-components": "^6.1.12"
   },
   "devDependencies": {
