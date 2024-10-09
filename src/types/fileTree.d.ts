@@ -5,6 +5,7 @@ export interface TreeData {
   handle: FileSystemFileHandle | FileSystemDirectoryHandle;
   children?: TreeData[];
   parentHandle: FileSystemDirectoryHandle;
+  parentNode?: TreeData;
 }
 
 export type handleSetCurrentNode = (currentNode: TreeData) => void;

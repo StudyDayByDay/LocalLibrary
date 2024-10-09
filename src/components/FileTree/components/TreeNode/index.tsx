@@ -80,13 +80,19 @@ const TreeNodeBox = styled.div`
 export default function TreeNode(props: Props) {
   const {node, dataType, nodeType} = props;
   const [showChild, setShowChild] = useState(false);
+  const [updateFlag, setUpdateFlag] = useState(false);
   const {currentNode, handleSetCurrentNode, handleHiddenFileEdit, handleHiddenDirectoryEdit} = useContext(FileContext);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const updateRef = useRef<HTMLInputElement>(null);
+  const divRef = useRef<HTMLDivElement>(null);
 
   const handleClick = async () => {
     handleSetCurrentNode(node);
     setShowChild(!showChild);
+    if (divRef.current) {
+      divRef.current.focus();
+    }
   };
 
   useEffect(() => {
@@ -94,6 +100,15 @@ export default function TreeNode(props: Props) {
       inputRef.current.focus();
     }
   }, [node.type]);
+
+  useEffect(() => {
+    if (updateRef.current) {
+      updateRef.current.value = node.name;
+      const length = node.name.split('.')[0].length;
+      updateRef.current.focus();
+      updateRef.current.setSelectionRange(0, length);
+    }
+  }, [updateFlag]);
 
   const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -116,6 +131,24 @@ export default function TreeNode(props: Props) {
     }
   };
 
+  const handleUpdate = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.key === 'Enter') {
+      // 聚焦
+      setUpdateFlag(true);
+    }
+  };
+
+  const handleUpdateEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      // 处理回车事件
+      console.log('回车');
+    }
+  };
+
+  const handleUpdateBlur = () => {
+    console.log('失焦');
+  };
+
   return (
     // data-type='node'表示是被渲染的子集，最左边需要加边框
     // node-type='lastParent'表示是最后的父级，需要去除父级边框
@@ -129,9 +162,13 @@ export default function TreeNode(props: Props) {
               <input type="text" ref={inputRef} onKeyDown={handleEnter} onBlur={handleBlur} />
             </div>
           ) : (
-            <div className="content" onClick={handleClick} title={node.name}>
+            <div tabIndex={0} className="content" ref={divRef} onClick={handleClick} title={node.name} onKeyDown={handleUpdate}>
               {node.children ? <img src={showChild ? folderOpen : folder} /> : <SvgIcon fileName={node.name} />}
-              <span className={node === currentNode ? 'text selected' : 'text'}>{node.name}</span>
+              {updateFlag ? (
+                <input type="text" ref={updateRef} onKeyDown={handleUpdateEnter} onBlur={handleUpdateBlur} />
+              ) : (
+                <span className={node === currentNode ? 'text selected' : 'text'}>{node.name}</span>
+              )}
             </div>
           )}
         </div>

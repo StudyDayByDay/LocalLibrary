@@ -134,7 +134,7 @@ export function getEditorTypeByFileSuffix(fileName: string) {
   return suffix in fileExtensionsToLanguages ? fileExtensionsToLanguages[suffix] : 'txt';
 }
 
-export async function handleDirectoryToArray(dirHandle: FileSystemDirectoryHandle) {
+export async function handleDirectoryToArray(dirHandle: FileSystemDirectoryHandle, parentNode?: TreeData) {
   const result = [];
   for await (const entry of dirHandle.values()) {
     if (entry.kind === 'directory') {
@@ -145,6 +145,7 @@ export async function handleDirectoryToArray(dirHandle: FileSystemDirectoryHandl
         children: [],
         handle: subDirHandle,
         parentHandle: dirHandle,
+        parentNode,
       });
     } else if (entry.kind === 'file') {
       result.push({
@@ -152,6 +153,7 @@ export async function handleDirectoryToArray(dirHandle: FileSystemDirectoryHandl
         type: 'file' as TreeNodeType,
         handle: entry,
         parentHandle: dirHandle,
+        parentNode,
       });
     }
   }

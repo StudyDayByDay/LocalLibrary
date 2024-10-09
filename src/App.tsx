@@ -4,7 +4,7 @@ import edit from './assets/svg/edit.svg';
 import addStatus from './assets/svg/addStatus.svg';
 import FileTree from '@/components/FileTree';
 import FileDetail from '@/components/FileDetail';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {handleDirectoryToArray} from '@/utils/index.ts';
 import FileContext from '@/context/FileContext';
 import {TreeData} from '@/types/fileTree';
@@ -101,12 +101,27 @@ function App() {
   const [currentNode, setCurrentNode] = useState<TreeData>();
   const [operateFlag, setOperateFlag] = useState(false);
 
+  useEffect(() => {
+    document.addEventListener('keydown', function (event) {
+      // 检查是否按下了 Command (Mac) 或 Ctrl (Windows) + S
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault(); // 阻止浏览器的默认保存行为
+      }
+    });
+  }, []);
+
   // 选择初始文件
   const selectDirectory = async function () {
     try {
       const dirHandle = await window.showDirectoryPicker({mode: 'readwrite'}); // 选择文件夹
       setCurrentGlobalFolder(dirHandle);
-      const directoryArray = await handleDirectoryToArray(dirHandle);
+      const directoryArray = await handleDirectoryToArray(dirHandle, {
+        name: 'TOP',
+        type: 'directory',
+        handle: dirHandle,
+        parentHandle: dirHandle,
+        parentNode: undefined,
+      });
       setTreeData(directoryArray);
       setChooseStatus(true);
       console.log(JSON.stringify(directoryArray, null, 2), 111); // 打印结果
@@ -123,7 +138,7 @@ function App() {
       setCurrentFile(file);
     } else if (!currentNode!.children?.length) {
       // 读取子目录
-      currentNode!.children = await handleDirectoryToArray(currentNode.handle);
+      currentNode!.children = await handleDirectoryToArray(currentNode.handle, currentNode);
     }
     setCurrentNode(currentNode);
   };
@@ -131,137 +146,101 @@ function App() {
   // 显示文件编辑框
   const handleAddFileEdit = () => {
     // 判断是否是全局的还是局部的
-    if (currentNode) {
-      // 局部
-      if (operateFlag) {
-        // currentNode.children?.shift();
-        currentNode.children![0].type = 'fileEdit';
-      } else {
-        currentNode.children?.unshift({
-          name: 'null',
-          type: 'fileEdit',
-          handle: currentGlobalFolder!,
-          parentHandle: currentGlobalFolder!,
-        });
-      }
-      setTreeData([...treeData]);
+    const handleArr: TreeData[] = (currentNode ? currentNode.children || currentNode.parentNode?.children || treeData : treeData) as TreeData[],
+      placeNode: TreeData = {
+        name: 'null',
+        type: 'fileEdit',
+        handle: currentGlobalFolder!,
+        parentHandle: currentGlobalFolder!,
+        parentNode: currentNode ? currentNode.parentNode : undefined,
+      };
+    if (operateFlag) {
+      handleArr[0].type = 'fileEdit';
     } else {
-      // 全局
-      if (operateFlag) {
-        // treeData.shift();
-        treeData[0].type = 'fileEdit';
-      } else {
-        treeData.unshift({
-          name: 'null',
-          type: 'fileEdit',
-          handle: currentGlobalFolder!,
-          parentHandle: currentGlobalFolder!,
-        });
-      }
-      setTreeData([...treeData]);
+      handleArr.unshift(placeNode);
     }
+    setTreeData([...treeData]);
     setOperateFlag(true);
   };
 
   // 隐藏文件编辑框逻辑
   const handleHiddenFileEdit = async (value: string) => {
     // 判断是否是全局的还是局部的
-    if (currentNode) {
-      // 局部
-      if (value) {
-        // 新增文件逻辑
-        const handle = currentNode.children ? currentNode.handle : currentNode.parentHandle;
-        await handle.getFileHandle(value, {create: true});
-        const arr = await handleDirectoryToArray(handle as FileSystemDirectoryHandle);
-        currentNode.children = [...arr];
-        setTreeData([...treeData]);
-      } else {
-        // 回退文件编辑逻辑，文件编辑状态为false
-        currentNode.children?.shift();
-        setTreeData([...treeData]);
-      }
+    const handle = currentNode ? (currentNode.children ? currentNode.handle : currentNode.parentHandle) : currentGlobalFolder,
+      handleArr = currentNode ? (currentNode.children ? currentNode.children : currentNode.parentNode?.children || treeData) : treeData,
+      parentNode = currentNode
+        ? currentNode.children
+          ? currentNode
+          : currentNode.parentNode
+        : ({
+            name: 'TOP',
+            type: 'directory',
+            handle: currentGlobalFolder,
+            parentHandle: currentGlobalFolder,
+            parentNode: undefined,
+          } as TreeData);
+    if (value) {
+      // 新增文件逻辑
+      await (handle as FileSystemFileHandle).getFileHandle(value, {create: true});
+      const arr = await handleDirectoryToArray(handle as FileSystemDirectoryHandle, parentNode);
+      handleArr!.length = 0;
+      handleArr!.push(...arr);
     } else {
-      // 全局
-      if (value) {
-        // 新增文件逻辑
-        await currentGlobalFolder!.getFileHandle(value, {create: true});
-        const arr = await handleDirectoryToArray(currentGlobalFolder!);
-        setTreeData([...arr]);
-      } else {
-        // 回退文件编辑逻辑，文件编辑状态为false
-        treeData.shift();
-        setTreeData([...treeData]);
-      }
+      // 回退文件编辑逻辑，文件编辑状态为false
+      handleArr!.shift();
     }
+    setTreeData([...treeData]);
     setOperateFlag(false);
   };
 
   // 显示文件夹编辑框
   const handleAddDirectoryEdit = () => {
     // 判断是否是全局的还是局部的
-    if (currentNode) {
-      // 局部
-      if (operateFlag) {
-        currentNode.children![0].type = 'directoryEdit';
-      } else {
-        currentNode.children?.unshift({
-          name: 'addDirectory.null',
-          type: 'directoryEdit',
-          handle: currentGlobalFolder!,
-          children: [],
-          parentHandle: currentGlobalFolder!,
-        });
-      }
-      setTreeData([...treeData]);
+    const handleArr: TreeData[] = (currentNode ? currentNode.children || currentNode.parentNode?.children || treeData : treeData) as TreeData[],
+      placeNode: TreeData = {
+        name: 'null',
+        type: 'directoryEdit',
+        handle: currentGlobalFolder!,
+        children: [],
+        parentHandle: currentGlobalFolder!,
+        parentNode: currentNode ? currentNode.parentNode : undefined,
+      };
+    if (operateFlag) {
+      handleArr[0].type = 'directoryEdit';
     } else {
-      // 全局
-      if (operateFlag) {
-        // treeData.shift();
-        treeData[0].type = 'directoryEdit';
-      } else {
-        treeData.unshift({
-          name: 'null',
-          type: 'directoryEdit',
-          handle: currentGlobalFolder!,
-          children: [],
-          parentHandle: currentGlobalFolder!,
-        });
-      }
-      setTreeData([...treeData]);
+      handleArr.unshift(placeNode);
     }
+    setTreeData([...treeData]);
     setOperateFlag(true);
   };
 
   // 隐藏文件夹编辑框逻辑
   const handleHiddenDirectoryEdit = async (value: string) => {
     // 判断是否是全局的还是局部的
-    if (currentNode) {
-      // 局部
-      if (value) {
-        // 新增文件夹逻辑
-        const handle = currentNode.children ? currentNode.handle : currentNode.parentHandle;
-        await handle.getDirectoryHandle(value, {create: true});
-        const arr = await handleDirectoryToArray(handle as FileSystemDirectoryHandle);
-        currentNode.children = [...arr];
-        setTreeData([...treeData]);
-      } else {
-        // 回退文件编辑逻辑，文件编辑状态为false
-        currentNode.children?.shift();
-        setTreeData([...treeData]);
-      }
+    const handle = currentNode ? (currentNode.children ? currentNode.handle : currentNode.parentHandle) : currentGlobalFolder,
+      handleArr = currentNode ? (currentNode.children ? currentNode.children : currentNode.parentNode?.children || treeData) : treeData,
+      parentNode = currentNode
+        ? currentNode.children
+          ? currentNode
+          : currentNode.parentNode
+        : ({
+            name: 'TOP',
+            type: 'directory',
+            handle: currentGlobalFolder,
+            parentHandle: currentGlobalFolder,
+            parentNode: undefined,
+          } as TreeData);
+    if (value) {
+      // 新增文件逻辑
+      await (handle as FileSystemFileHandle).getDirectoryHandle(value, {create: true});
+      const arr = await handleDirectoryToArray(handle as FileSystemDirectoryHandle, parentNode);
+      handleArr!.length = 0;
+      handleArr!.push(...arr);
     } else {
-      // 全局
-      if (value) {
-        // 新增文件夹逻辑
-        await currentGlobalFolder!.getDirectoryHandle(value, {create: true});
-        const arr = await handleDirectoryToArray(currentGlobalFolder!);
-        setTreeData([...arr]);
-      } else {
-        // 回退文件编辑逻辑，文件编辑状态为false
-        treeData.shift();
-        setTreeData([...treeData]);
-      }
+      // 回退文件编辑逻辑，文件编辑状态为false
+      handleArr!.shift();
     }
+    setTreeData([...treeData]);
     setOperateFlag(false);
   };
 
