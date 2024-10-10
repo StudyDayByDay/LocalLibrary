@@ -160,3 +160,39 @@ export async function handleDirectoryToArray(dirHandle: FileSystemDirectoryHandl
   handleSortFiles(result);
   return result;
 }
+
+// 图片文件后缀名
+const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'tif', 'svg', 'webp', 'ico', 'heic', 'heif'];
+
+// 视频文件后缀名
+const videoExtensions = ['mp4', 'mov', 'avi', 'wmv', 'mkv', 'flv', 'webm', '3gp', 'm4v', 'ts'];
+
+// 办公文档文件后缀名
+const documentExtensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pdf'];
+
+export function getSuffix(fileName: string) {
+  const arr = fileName.split('.');
+  return arr[arr.length - 1];
+}
+
+export function isMediaFile(fileName: string) {
+  // 合并所有文件后缀名
+  const suffix = getSuffix(fileName);
+  const allExtensions = [...imageExtensions, ...videoExtensions, ...documentExtensions];
+  return allExtensions.includes(suffix);
+}
+
+export function getMediaType(fileName: string) {
+  let type = 'none';
+  const suffix = getSuffix(fileName);
+  if (imageExtensions.includes(suffix)) {
+    type = 'image';
+  }
+  if (videoExtensions.includes(suffix)) {
+    type = 'video';
+  }
+  if (documentExtensions.includes(suffix)) {
+    type = 'document';
+  }
+  return type;
+}

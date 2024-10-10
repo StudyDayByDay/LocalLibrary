@@ -1,7 +1,8 @@
 import {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import Editor from '@/components/FileDetail/components/Editor';
-import {getEditorTypeByFileSuffix} from '@/utils';
+import Media from '@/components/FileDetail/components/Media';
+import {getEditorTypeByFileSuffix, isMediaFile} from '@/utils';
 import SvgIcon from '@/components/FileTree/components/SvgIcon';
 
 const FileDetailBox = styled.div`
@@ -43,7 +44,8 @@ export default function FileDetail({file}: {file?: File}) {
             {file?.name}
           </div>
           <div className="file-detail">
-            <Editor value={content} language={getEditorTypeByFileSuffix(file!.name)} />
+            {/* 图片、svg、word、ppt、视频 */}
+            {isMediaFile(file?.name) ? <Media file={file} /> : <Editor value={content} language={getEditorTypeByFileSuffix(file!.name)} />}
           </div>
         </>
       ) : null}
