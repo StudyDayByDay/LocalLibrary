@@ -16,6 +16,7 @@ export default defineConfig({
       languageWorkers: ['editorWorkerService', 'typescript', 'css', 'html', 'json'], // 选择你需要的语言支持
     }),
   ],
+  base: '/LocalLibrary/',
   server: {
     host: true,
     open: true,
