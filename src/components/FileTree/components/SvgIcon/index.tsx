@@ -13,6 +13,10 @@ import vue from '@/assets/svg/file-vue.svg';
 import nvmrc from '@/assets/svg/file-nvm.svg';
 import git from '@/assets/svg/file-git.svg';
 import none from '@/assets/svg/file-none.svg';
+import word from '@/assets/svg/file-word.svg';
+import excel from '@/assets/svg/file-excel.svg';
+import text from '@/assets/svg/file-text.svg';
+import video from '@/assets/svg/file-video.svg';
 
 export default function SvgIcon({fileName}: {fileName: string}) {
   const svgMap: {
@@ -20,10 +24,24 @@ export default function SvgIcon({fileName}: {fileName: string}) {
   } = {
     md,
     MD: md,
+    doc: word,
+    docx: word,
+    xls: excel,
+    xlsx: excel,
     pdf,
     ppt,
     pptx: ppt,
     png: image,
+    mp4: video,
+    mov: video,
+    avi: video,
+    wmv: video,
+    mkv: video,
+    flv: video,
+    webm: video,
+    '3gp': video,
+    m4v: video,
+    txt: text,
     jpg: image,
     jpeg: image,
     svg,

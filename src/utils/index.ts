@@ -165,7 +165,7 @@ export async function handleDirectoryToArray(dirHandle: FileSystemDirectoryHandl
 const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'tif', 'svg', 'webp', 'ico', 'heic', 'heif'];
 
 // 视频文件后缀名
-const videoExtensions = ['mp4', 'mov', 'avi', 'wmv', 'mkv', 'flv', 'webm', '3gp', 'm4v', 'ts'];
+const videoExtensions = ['mp4', 'mov', 'avi', 'wmv', 'mkv', 'flv', 'webm', '3gp', 'm4v'];
 
 // 办公文档文件后缀名
 const documentExtensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pdf'];
