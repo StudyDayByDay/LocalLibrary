@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* 
 只能支持docx和xls、xlsx、pdf，ppt支持不了
@@ -8,7 +9,7 @@ import {renderAsync} from 'docx-preview';
 import {HotTable} from '@handsontable/react';
 import * as XLSX from 'xlsx';
 import 'handsontable/dist/handsontable.full.css';
-import Handsontable from 'handsontable/base';
+import {GridSettings} from 'node_modules/handsontable/settings';
 import {registerAllModules} from 'handsontable/registry';
 
 registerAllModules();
@@ -68,7 +69,7 @@ export default function DocumentView({file}: {file: File}) {
   const notSupport = ['doc', 'ppt', 'pptx'];
   const [type, setType] = useState('');
   const wordRef = useRef<HTMLDivElement>(null);
-  const [hotSettings, setHotSettings] = useState({
+  const [hotSettings, setHotSettings] = useState<GridSettings>({
     data: [],
     colHeaders: true,
     rowHeaders: true,
@@ -89,38 +90,38 @@ export default function DocumentView({file}: {file: File}) {
 
   const handleExcel = () => {
     const reader = new FileReader();
-
     reader.onload = (e) => {
       const arrayBuffer = e.target?.result;
       if (arrayBuffer) {
         const workbookData = XLSX.read(arrayBuffer, {type: 'array'});
-        console.log(workbookData);
+        console.log(workbookData, 'workbookData');
         setWorkbook(workbookData);
-        setSheetNames(workbookData.SheetNames);
-        handleSetExcelData(workbookData.SheetNames[0], workbookData);
-        setCurrentSheetName(workbookData.SheetNames[0]);
       }
     };
     reader.readAsArrayBuffer(file); // 读取文件
   };
 
-  const handleSetExcelData = (sheetName: string, workbookData?: XLSX.WorkBook) => {
-    const workbookHandle = workbook || workbookData;
-    const worksheet = workbookHandle?.Sheets[sheetName] as XLSX.WorkSheet;
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+  const handleSetExcelData = (sheetName: string) => {
+    const worksheet = workbook?.Sheets[sheetName] as XLSX.WorkSheet;
+    const jsonData: any[][] = XLSX.utils.sheet_to_json(worksheet, {header: 1});
 
     setCurrentSheetName(sheetName);
-
+    console.log(workbook, 'workbook');
+    console.log(worksheet, 'worksheet');
     // 设置单元格合并情况
     const merges = worksheet['!merges'] || [];
-    console.log(worksheet, 'worksheet');
     console.log(merges, 'merges');
-    const formattedMerges = merges.map((merge: any) => ({
-      row: merge.s.r,
-      col: merge.s.c,
-      rowspan: merge.e.r - merge.s.r + 1,
-      colspan: merge.e.c - merge.s.c + 1,
-    }));
+    const formattedMerges = merges.map(
+      (merge: {
+        s: {r: number; c: number}; // 起始单元格 (start)
+        e: {r: number; c: number}; // 结束单元格 (end)
+      }) => ({
+        row: merge.s.r,
+        col: merge.s.c,
+        rowspan: merge.e.r - merge.s.r + 1,
+        colspan: merge.e.c - merge.s.c + 1,
+      })
+    );
     console.log(formattedMerges, 'formattedMerges');
     console.log(jsonData, 'jsonData');
     merges.forEach((merge) => {
@@ -141,7 +142,6 @@ export default function DocumentView({file}: {file: File}) {
       data: jsonData,
       colHeaders: true,
       rowHeaders: true,
-      //  社区版不支持单元格合并。。。
       mergeCells: formattedMerges,
     });
   };
@@ -158,6 +158,15 @@ export default function DocumentView({file}: {file: File}) {
     (type === 'xls' || type === 'xlsx') && handleExcel();
     type === 'pdf' && handlePDF();
   }, [file]);
+
+  useEffect(() => {
+    if (workbook) {
+      handleSetExcelData(workbook!.SheetNames[0]);
+      setSheetNames(workbook!.SheetNames);
+      setCurrentSheetName(workbook!.SheetNames[0]);
+    }
+    console.log(workbook, 'workbook');
+  }, [workbook]);
 
   return (
     <>
