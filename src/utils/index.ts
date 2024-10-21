@@ -135,6 +135,7 @@ export function getEditorTypeByFileSuffix(fileName: string) {
 }
 
 export async function handleDirectoryToArray(dirHandle: FileSystemDirectoryHandle, parentNode?: TreeData) {
+  console.log(dirHandle, 'dirHandle');
   const result = [];
   for await (const entry of dirHandle.values()) {
     if (entry.kind === 'directory') {
@@ -195,4 +196,46 @@ export function getMediaType(fileName: string) {
     type = 'document';
   }
   return type;
+}
+
+export async function renameFile(directoryHandle: FileSystemDirectoryHandle, oldFileName: string, newFileName: string): Promise<void> {
+  // 获取旧文件的 FileSystemFileHandle
+  const oldFileHandle = await directoryHandle.getFileHandle(oldFileName);
+
+  // 读取旧文件内容
+  const oldFile = await oldFileHandle.getFile();
+  const oldFileContent = await oldFile.arrayBuffer();
+
+  // 创建新文件并写入旧文件内容
+  const newFileHandle = await directoryHandle.getFileHandle(newFileName, {create: true});
+  const writable = await newFileHandle.createWritable();
+  await writable.write(oldFileContent);
+  await writable.close();
+
+  // 删除旧文件
+  await directoryHandle.removeEntry(oldFileName);
+}
+
+export async function renameDirectory(parentDirectoryHandle: FileSystemDirectoryHandle, oldDirectoryName: string, newDirectoryName: string): Promise<void> {
+  // 获取旧文件夹的 FileSystemDirectoryHandle
+  const oldDirectoryHandle = await parentDirectoryHandle.getDirectoryHandle(oldDirectoryName);
+
+  // 创建新的文件夹
+  const newDirectoryHandle = await parentDirectoryHandle.getDirectoryHandle(newDirectoryName, {create: true});
+
+  // 复制旧文件夹中的文件到新文件夹
+  for await (const [name, handle] of oldDirectoryHandle) {
+    if (handle.kind === 'file') {
+      const file = await handle.getFile();
+      const writable = await newDirectoryHandle.getFileHandle(name, {create: true}).then((fileHandle) => fileHandle.createWritable());
+      await writable.write(await file.arrayBuffer());
+      await writable.close();
+    } else if (handle.kind === 'directory') {
+      // 递归复制子文件夹
+      await renameDirectory(oldDirectoryHandle, name, name);
+    }
+  }
+
+  // 删除旧文件夹
+  await parentDirectoryHandle.removeEntry(oldDirectoryName, {recursive: true});
 }

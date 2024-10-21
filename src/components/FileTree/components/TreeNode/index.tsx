@@ -81,7 +81,7 @@ export default function TreeNode(props: Props) {
   const {node, dataType, nodeType} = props;
   const [showChild, setShowChild] = useState(false);
   const [updateFlag, setUpdateFlag] = useState(false);
-  const {currentNode, handleSetCurrentNode, handleHiddenFileEdit, handleHiddenDirectoryEdit} = useContext(FileContext);
+  const {currentNode, handleSetCurrentNode, handleHiddenFileEdit, handleHiddenDirectoryEdit, handleUpdateFileOrFolder} = useContext(FileContext);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const updateRef = useRef<HTMLInputElement>(null);
@@ -142,11 +142,25 @@ export default function TreeNode(props: Props) {
     if (e.key === 'Enter') {
       // 处理回车事件
       console.log('回车');
+      handleFileOrFolderUpdate();
     }
   };
 
   const handleUpdateBlur = () => {
     console.log('失焦');
+    handleFileOrFolderUpdate();
+  };
+
+  const handleFileOrFolderUpdate = async () => {
+    console.log('log', updateRef.current?.value);
+    // 新文件/夹名为空或者是跟之前一样，则不做处理
+    if (!updateRef.current?.value || updateRef.current?.value === node.name) {
+      setUpdateFlag(false);
+      return;
+    }
+    // TODO：检测当处理的是文件的时候，后缀名是否更改
+    setUpdateFlag(false);
+    await handleUpdateFileOrFolder(node, updateRef.current?.value);
   };
 
   return (

@@ -5,7 +5,7 @@ import addStatus from './assets/svg/addStatus.svg';
 import FileTree from '@/components/FileTree';
 import FileDetail from '@/components/FileDetail';
 import {useEffect, useState} from 'react';
-import {handleDirectoryToArray} from '@/utils/index.ts';
+import {handleDirectoryToArray, renameFile, renameDirectory} from '@/utils/index.ts';
 import FileContext from '@/context/FileContext';
 import {TreeData} from '@/types/fileTree';
 
@@ -244,6 +244,25 @@ function App() {
     setOperateFlag(false);
   };
 
+  // 修改文件、文件夹
+  const handleUpdateFileOrFolder = async (handleNode: TreeData, newName: string) => {
+    // 取到父级
+    const parentNode = handleNode.parentNode,
+      parentHandle = handleNode.parentHandle,
+      handle = handleNode.handle,
+      oldName = handleNode.name;
+    const handleArr = handleNode.parentNode?.children || treeData;
+    if (handle.kind === 'file') {
+      await renameFile(parentHandle, oldName, newName);
+    } else {
+      await renameDirectory(parentHandle, oldName, newName);
+    }
+    const arr = await handleDirectoryToArray(parentHandle, parentNode?.parentNode || parentNode);
+    handleArr!.length = 0;
+    handleArr!.push(...arr);
+    setTreeData([...treeData]);
+  };
+
   const handleTreePanelClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     // 确保只有在点击父级元素本身时才触发
     // event.target：表示实际被点击的元素
@@ -255,7 +274,7 @@ function App() {
 
   return (
     <>
-      <FileContext.Provider value={{currentFile, currentNode, handleSetCurrentNode, handleHiddenFileEdit, handleHiddenDirectoryEdit}}>
+      <FileContext.Provider value={{currentFile, currentNode, handleSetCurrentNode, handleHiddenFileEdit, handleHiddenDirectoryEdit, handleUpdateFileOrFolder}}>
         <Obsidian>
           <div className="left">
             <div className="tabBar">
