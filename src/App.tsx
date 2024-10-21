@@ -261,6 +261,7 @@ function App() {
     handleArr!.length = 0;
     handleArr!.push(...arr);
     setTreeData([...treeData]);
+    setCurrentFile(undefined);
   };
 
   const handleTreePanelClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {

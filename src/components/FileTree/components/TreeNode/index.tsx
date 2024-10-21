@@ -89,7 +89,9 @@ export default function TreeNode(props: Props) {
 
   const handleClick = async () => {
     handleSetCurrentNode(node);
-    setShowChild(!showChild);
+    if (node.handle.kind === 'directory') {
+      setShowChild(!showChild);
+    }
     if (divRef.current) {
       divRef.current.focus();
     }
@@ -109,6 +111,12 @@ export default function TreeNode(props: Props) {
       updateRef.current.setSelectionRange(0, length);
     }
   }, [updateFlag]);
+
+  useEffect(() => {
+    if (showChild) {
+      handleSetCurrentNode(node);
+    }
+  }, [node]);
 
   const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -142,7 +150,10 @@ export default function TreeNode(props: Props) {
     if (e.key === 'Enter') {
       // 处理回车事件
       console.log('回车');
-      handleFileOrFolderUpdate();
+      e.preventDefault(); // 阻止默认行为
+      setTimeout(() => {
+        handleFileOrFolderUpdate();
+      }, 0);
     }
   };
 
