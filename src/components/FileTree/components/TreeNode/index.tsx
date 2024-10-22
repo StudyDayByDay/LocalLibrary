@@ -5,6 +5,7 @@ import folderOpen from '@/assets/svg/file-folder-open.svg';
 import SvgIcon from '../SvgIcon';
 import type {Props} from '@/types/fileTree';
 import FileContext from '@/context/FileContext';
+import useModal from '@/Hooks/UseModal';
 
 const TreeNodeBox = styled.div`
   &[data-type='node'] {
@@ -81,7 +82,8 @@ export default function TreeNode(props: Props) {
   const {node, dataType, nodeType} = props;
   const [showChild, setShowChild] = useState(false);
   const [updateFlag, setUpdateFlag] = useState(false);
-  const {currentNode, handleSetCurrentNode, handleHiddenFileEdit, handleHiddenDirectoryEdit, handleUpdateFileOrFolder} = useContext(FileContext);
+  const {currentNode, handleSetCurrentNode, handleHiddenFileEdit, handleHiddenDirectoryEdit, handleUpdateFileOrFolder, openFolder, deleteFileOrFolder} = useContext(FileContext);
+  const {showModal, Modal} = useModal();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const updateRef = useRef<HTMLInputElement>(null);
@@ -114,7 +116,7 @@ export default function TreeNode(props: Props) {
 
   useEffect(() => {
     if (showChild) {
-      handleSetCurrentNode(node);
+      openFolder(node);
     }
   }, [node]);
 
@@ -139,10 +141,21 @@ export default function TreeNode(props: Props) {
     }
   };
 
-  const handleUpdate = (e: React.KeyboardEvent<HTMLElement>) => {
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLElement>) => {
+    console.log(e.key);
     if (e.key === 'Enter') {
       // 聚焦
       setUpdateFlag(true);
+    }
+    if (e.key === 'Backspace') {
+      // 删除文件
+      try {
+        await showModal('删除不可逆，请谨慎操作!!!', `是否确定要永久删除：${node.handle.kind === 'file' ? '文件' : '文件夹'} “${node.name}”?`);
+        console.log('用户选择了确定');
+        deleteFileOrFolder(node.parentNode!, node.name);
+      } catch {
+        console.log('用户选择了取消');
+      }
     }
   };
 
@@ -178,6 +191,7 @@ export default function TreeNode(props: Props) {
     // data-type='node'表示是被渲染的子集，最左边需要加边框
     // node-type='lastParent'表示是最后的父级，需要去除父级边框
     <TreeNodeBox data-type={dataType} node-type={nodeType}>
+      <Modal />
       <div className="tree-title">
         <div className="tree-title-content">
           <div className="line"></div>
@@ -187,7 +201,7 @@ export default function TreeNode(props: Props) {
               <input type="text" ref={inputRef} onKeyDown={handleEnter} onBlur={handleBlur} />
             </div>
           ) : (
-            <div tabIndex={0} className="content" ref={divRef} onClick={handleClick} title={node.name} onKeyDown={handleUpdate}>
+            <div tabIndex={0} className="content" ref={divRef} onClick={handleClick} title={node.name} onKeyDown={handleKeyDown}>
               {node.children ? <img src={showChild ? folderOpen : folder} /> : <SvgIcon fileName={node.name} />}
               {updateFlag ? (
                 <input type="text" ref={updateRef} onKeyDown={handleUpdateEnter} onBlur={handleUpdateBlur} />

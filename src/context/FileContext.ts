@@ -9,6 +9,9 @@ const FileContext = createContext<FC>({
   handleSetCurrentNode() {},
   handleHiddenFileEdit() {},
   handleHiddenDirectoryEdit() {},
+  handleUpdateFileOrFolder() {},
+  async openFolder() {},
+  async deleteFileOrFolder() {},
 });
 
 export default FileContext;

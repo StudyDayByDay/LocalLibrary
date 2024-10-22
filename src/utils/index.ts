@@ -217,25 +217,58 @@ export async function renameFile(directoryHandle: FileSystemDirectoryHandle, old
 }
 
 export async function renameDirectory(parentDirectoryHandle: FileSystemDirectoryHandle, oldDirectoryName: string, newDirectoryName: string): Promise<void> {
-  // 获取旧文件夹的 FileSystemDirectoryHandle
-  const oldDirectoryHandle = await parentDirectoryHandle.getDirectoryHandle(oldDirectoryName);
+  try {
+    // 获取旧文件夹的 FileSystemDirectoryHandle
+    const oldDirectoryHandle = await parentDirectoryHandle.getDirectoryHandle(oldDirectoryName);
 
-  // 创建新的文件夹
-  const newDirectoryHandle = await parentDirectoryHandle.getDirectoryHandle(newDirectoryName, {create: true});
+    // 创建新的文件夹
+    const newDirectoryHandle = await parentDirectoryHandle.getDirectoryHandle(newDirectoryName, {create: true});
 
-  // 复制旧文件夹中的文件到新文件夹
+    // 递归复制文件夹内容并等待完成
+    await copyDirectoryContents(oldDirectoryHandle, newDirectoryHandle);
+
+    // 删除旧文件夹
+    await parentDirectoryHandle.removeEntry(oldDirectoryName, {recursive: true});
+
+    // 返回操作完成的 Promise
+    console.log('All operations completed successfully.');
+  } catch (error) {
+    console.error(`Failed to rename directory: ${error}`);
+    throw error; // 将错误抛出，返回 rejected promise
+  }
+}
+
+async function copyDirectoryContents(oldDirectoryHandle: FileSystemDirectoryHandle, newDirectoryHandle: FileSystemDirectoryHandle): Promise<void> {
+  // 创建一个任务数组来存储所有的复制操作
+  const tasks: Promise<void>[] = [];
+
+  // 遍历旧文件夹中的所有文件和子文件夹
   for await (const [name, handle] of oldDirectoryHandle) {
-    if (handle.kind === 'file') {
-      const file = await handle.getFile();
-      const writable = await newDirectoryHandle.getFileHandle(name, {create: true}).then((fileHandle) => fileHandle.createWritable());
-      await writable.write(await file.arrayBuffer());
-      await writable.close();
-    } else if (handle.kind === 'directory') {
-      // 递归复制子文件夹
-      await renameDirectory(oldDirectoryHandle, name, name);
-    }
+    const task = (async () => {
+      try {
+        if (handle.kind === 'file') {
+          // 处理文件复制
+          const file = await handle.getFile();
+          const newFileHandle = await newDirectoryHandle.getFileHandle(name, {create: true});
+          const writable = await newFileHandle.createWritable();
+          await writable.write(await file.arrayBuffer());
+          await writable.close();
+        } else if (handle.kind === 'directory') {
+          // 处理子文件夹复制
+          const newSubDirectoryHandle = await newDirectoryHandle.getDirectoryHandle(name, {create: true});
+          // 递归处理子文件夹并等待其完成
+          await copyDirectoryContents(handle, newSubDirectoryHandle);
+        }
+      } catch (error) {
+        console.error(`Failed to copy entry: ${name}. Error: ${error}`);
+        throw error; // 如果出错，抛出错误
+      }
+    })();
+
+    // 将该任务添加到任务数组中
+    tasks.push(task);
   }
 
-  // 删除旧文件夹
-  await parentDirectoryHandle.removeEntry(oldDirectoryName, {recursive: true});
+  // 等待所有任务完成
+  await Promise.all(tasks);
 }

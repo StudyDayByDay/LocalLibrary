@@ -12,6 +12,8 @@ export type handleSetCurrentNode = (currentNode: TreeData) => void;
 export type handleHiddenFileEdit = (value: string) => void;
 export type handleHiddenDirectoryEdit = (value: string) => void;
 export type handleUpdateFileOrFolder = (handleNode: TreeData, newName: string) => void;
+export type openFolder = (node: TreeData) => Promise<void>;
+export type deleteFileOrFolder = (node: TreeData, name: string) => Promise<void>;
 
 export interface Props {
   node: TreeData;
@@ -26,4 +28,6 @@ export interface FC {
   handleHiddenFileEdit: handleHiddenFileEdit;
   handleHiddenDirectoryEdit: handleHiddenDirectoryEdit;
   handleUpdateFileOrFolder: handleUpdateFileOrFolder;
+  openFolder: openFolder;
+  deleteFileOrFolder: deleteFileOrFolder;
 }

@@ -20,6 +20,7 @@ const Obsidian = styled.div`
   .left {
     display: flex;
     flex-direction: column;
+    position: relative;
     .tabBar {
       display: flex;
       justify-content: flex-end;
@@ -75,6 +76,64 @@ const Obsidian = styled.div`
         transform: translate(-50%, -50%);
         cursor: pointer;
       }
+      .loader {
+        --s: 25px;
+        --g: 5px;
+
+        position: absolute;
+        z-index: 99;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: calc(2 * (1.353 * var(--s) + var(--g)));
+        aspect-ratio: 1;
+        background: linear-gradient(#1e5cca 0 0) left/50% 100% no-repeat, conic-gradient(from -90deg at var(--s) calc(0.353 * var(--s)), #fff 135deg, #666 0 270deg, #aaa 0);
+        background-blend-mode: multiply;
+        --_m: linear-gradient(to bottom right, #0000 calc(0.25 * var(--s)), #000 0 calc(100% - calc(0.25 * var(--s)) - 1.414 * var(--g)), #0000 0),
+          conic-gradient(from -90deg at right var(--g) bottom var(--g), #000 90deg, #0000 0);
+        -webkit-mask: var(--_m);
+        mask: var(--_m);
+        background-size: 50% 50%;
+        -webkit-mask-size: 50% 50%;
+        mask-size: 50% 50%;
+        -webkit-mask-composite: source-in;
+        mask-composite: intersect;
+        animation: l9 1.5s infinite;
+      }
+      @keyframes l9 {
+        0%,
+        12.5% {
+          background-position: 0% 0%, 0 0;
+        }
+        12.6%,
+        37.5% {
+          background-position: 100% 0%, 0 0;
+        }
+        37.6%,
+        62.5% {
+          background-position: 100% 100%, 0 0;
+        }
+        62.6%,
+        87.5% {
+          background-position: 0% 100%, 0 0;
+        }
+        87.6%,
+        100% {
+          background-position: 0% 0%, 0 0;
+        }
+      }
+    }
+    .modal-overlay {
+      pointer-events: none;
+      cursor: not-allowed;
+      background: radial-gradient(circle, rgba(0, 0, 0, 0.4) 20%, rgba(0, 0, 0, 0.2) 100%);
+      opacity: 0;
+      animation: fadeIn 0.3s forwards;
+    }
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
     }
   }
   .right {
@@ -100,6 +159,7 @@ function App() {
   const [currentGlobalFolder, setCurrentGlobalFolder] = useState<FileSystemDirectoryHandle>();
   const [currentNode, setCurrentNode] = useState<TreeData>();
   const [operateFlag, setOperateFlag] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     document.addEventListener('keydown', function (event) {
@@ -131,16 +191,22 @@ function App() {
   };
 
   // 设定当前选中的node
-  const handleSetCurrentNode = async (currentNode: TreeData) => {
+  const handleSetCurrentNode = async (node: TreeData) => {
     // 读取文件
-    if (currentNode.handle.kind === 'file') {
-      const file = await currentNode.handle.getFile();
+    if (node.handle.kind === 'file') {
+      const file = await node.handle.getFile();
       setCurrentFile(file);
-    } else if (!currentNode!.children?.length) {
+    } else {
       // 读取子目录
-      currentNode!.children = await handleDirectoryToArray(currentNode.handle, currentNode);
+      node.children = await handleDirectoryToArray(node.handle, node);
     }
-    setCurrentNode(currentNode);
+    setCurrentNode(node);
+  };
+
+  // 回显文件夹处理
+  const openFolder = async (node: TreeData) => {
+    node.children = await handleDirectoryToArray(node.handle as FileSystemDirectoryHandle, node);
+    setTreeData([...treeData]);
   };
 
   // 显示文件编辑框
@@ -252,6 +318,7 @@ function App() {
       handle = handleNode.handle,
       oldName = handleNode.name;
     const handleArr = handleNode.parentNode?.children || treeData;
+    setLoading(true);
     if (handle.kind === 'file') {
       await renameFile(parentHandle, oldName, newName);
     } else {
@@ -262,6 +329,22 @@ function App() {
     handleArr!.push(...arr);
     setTreeData([...treeData]);
     setCurrentFile(undefined);
+    setCurrentNode(undefined);
+    setLoading(false);
+  };
+
+  // 删除文件、文件夹
+  const deleteFileOrFolder = async (parentNode: TreeData, name: string) => {
+    console.log(parentNode, '/Users/likun/Desktop/测试保存/567.css');
+    const handle = parentNode.handle as FileSystemDirectoryHandle;
+    await handle.removeEntry(name, {recursive: true});
+    const handleArr = parentNode.children || treeData;
+    handleArr!.length = 0;
+    const arr = await handleDirectoryToArray(handle, parentNode.parentNode || parentNode);
+    handleArr.push(...arr);
+    setTreeData([...treeData]);
+    setCurrentFile(undefined);
+    setCurrentNode(undefined);
   };
 
   const handleTreePanelClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -275,7 +358,7 @@ function App() {
 
   return (
     <>
-      <FileContext.Provider value={{currentFile, currentNode, handleSetCurrentNode, handleHiddenFileEdit, handleHiddenDirectoryEdit, handleUpdateFileOrFolder}}>
+      <FileContext.Provider value={{currentFile, currentNode, handleSetCurrentNode, handleHiddenFileEdit, handleHiddenDirectoryEdit, handleUpdateFileOrFolder, openFolder, deleteFileOrFolder}}>
         <Obsidian>
           <div className="left">
             <div className="tabBar">
@@ -287,7 +370,8 @@ function App() {
                 <img src={add} title="新增文件夹" />
               </div>
             </div>
-            <div className="tree" onClick={handleTreePanelClick}>
+            <div className={`tree ${loading ? 'modal-overlay' : ''}`} onClick={handleTreePanelClick}>
+              {loading ? <div className="loader"></div> : null}
               {chooseStatus ? <FileTree treeData={treeData} /> : <img className="none" src={addStatus} onClick={selectDirectory} />}
             </div>
           </div>
