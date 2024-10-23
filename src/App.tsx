@@ -1,6 +1,8 @@
 import styled from 'styled-components';
-import add from './assets/svg/add.svg';
-import edit from './assets/svg/edit.svg';
+import folderAdd from './assets/svg/folder-add.svg';
+import fileAdd from './assets/svg/file-add.svg';
+import refresh from './assets/svg/sync.svg';
+import batchFolding from './assets/svg/batch-folding.svg';
 import addStatus from './assets/svg/addStatus.svg';
 import FileTree from '@/components/FileTree';
 import FileDetail from '@/components/FileDetail';
@@ -310,6 +312,38 @@ function App() {
     setOperateFlag(false);
   };
 
+  // 刷新资源管理器
+  const handleRefresh = async () => {
+    if (!currentGlobalFolder) return;
+    const directoryArray = await handleDirectoryToArray(currentGlobalFolder, {
+      name: 'TOP',
+      type: 'directory',
+      handle: currentGlobalFolder,
+      parentHandle: currentGlobalFolder,
+      parentNode: undefined,
+    });
+    setTreeData(directoryArray);
+    setCurrentFile(undefined);
+    setCurrentNode(undefined);
+  };
+
+  // 在资源管理器中折叠文件夹
+  const handleBatchFolding = async () => {
+    if (!currentGlobalFolder) return;
+    setChooseStatus(false);
+    const directoryArray = await handleDirectoryToArray(currentGlobalFolder, {
+      name: 'TOP',
+      type: 'directory',
+      handle: currentGlobalFolder,
+      parentHandle: currentGlobalFolder,
+      parentNode: undefined,
+    });
+    setTreeData(directoryArray);
+    setCurrentFile(undefined);
+    setCurrentNode(undefined);
+    setChooseStatus(true);
+  };
+
   // 修改文件、文件夹
   const handleUpdateFileOrFolder = async (handleNode: TreeData, newName: string) => {
     // 取到父级
@@ -334,17 +368,19 @@ function App() {
   };
 
   // 删除文件、文件夹
-  const deleteFileOrFolder = async (parentNode: TreeData, name: string) => {
-    console.log(parentNode, '/Users/likun/Desktop/测试保存/567.css');
-    const handle = parentNode.handle as FileSystemDirectoryHandle;
+  const deleteFileOrFolder = async (node: TreeData, name: string) => {
+    console.log(node, name);
+    setLoading(true);
+    const handle = node.parentHandle;
     await handle.removeEntry(name, {recursive: true});
-    const handleArr = parentNode.children || treeData;
+    const handleArr = node.parentNode?.children || treeData;
+    const arr = handleArr.filter((item) => item.name !== name);
     handleArr!.length = 0;
-    const arr = await handleDirectoryToArray(handle, parentNode.parentNode || parentNode);
     handleArr.push(...arr);
     setTreeData([...treeData]);
     setCurrentFile(undefined);
     setCurrentNode(undefined);
+    setLoading(false);
   };
 
   const handleTreePanelClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -364,10 +400,16 @@ function App() {
             <div className="tabBar">
               <div className="title">{currentGlobalFolder?.name}</div>
               <div className="icon" onClick={handleAddFileEdit}>
-                <img src={edit} title="新增文件" />
+                <img src={fileAdd} title="新增文件" />
               </div>
               <div className="icon" onClick={handleAddDirectoryEdit}>
-                <img src={add} title="新增文件夹" />
+                <img src={folderAdd} title="新增文件夹" />
+              </div>
+              <div className="icon" onClick={handleRefresh}>
+                <img src={refresh} title="刷新资源管理器" />
+              </div>
+              <div className="icon" onClick={handleBatchFolding}>
+                <img src={batchFolding} title="在资源管理器中折叠文件夹" />
               </div>
             </div>
             <div className={`tree ${loading ? 'modal-overlay' : ''}`} onClick={handleTreePanelClick}>
@@ -376,7 +418,7 @@ function App() {
             </div>
           </div>
           <div className="right">
-            <FileDetail file={currentFile} />
+            <FileDetail file={currentFile} chooseStatus={chooseStatus} />
           </div>
         </Obsidian>
       </FileContext.Provider>

@@ -152,7 +152,7 @@ export default function TreeNode(props: Props) {
       try {
         await showModal('删除不可逆，请谨慎操作!!!', `是否确定要永久删除：${node.handle.kind === 'file' ? '文件' : '文件夹'} “${node.name}”?`);
         console.log('用户选择了确定');
-        deleteFileOrFolder(node.parentNode!, node.name);
+        deleteFileOrFolder(node, node.name);
       } catch {
         console.log('用户选择了取消');
       }
@@ -160,6 +160,7 @@ export default function TreeNode(props: Props) {
   };
 
   const handleUpdateEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    e.stopPropagation();
     if (e.key === 'Enter') {
       // 处理回车事件
       console.log('回车');

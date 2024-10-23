@@ -21,9 +21,18 @@ const FileDetailBox = styled.div`
   .file-detail {
     height: calc(100% - 30px);
   }
+
+  .warm-tips {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #7b7a7a;
+  }
 `;
 
-export default function FileDetail({file}: {file?: File}) {
+export default function FileDetail({file, chooseStatus}: {file?: File; chooseStatus: boolean}) {
   const [content, setContent] = useState('');
 
   const getContent = async () => {
@@ -48,7 +57,9 @@ export default function FileDetail({file}: {file?: File}) {
             {isMediaFile(file?.name) ? <Media file={file} /> : <Editor value={content} language={getEditorTypeByFileSuffix(file!.name)} />}
           </div>
         </>
-      ) : null}
+      ) : chooseStatus ? null : (
+        <div className="warm-tips">请点击左侧加号选择文件夹</div>
+      )}
     </FileDetailBox>
   );
 }

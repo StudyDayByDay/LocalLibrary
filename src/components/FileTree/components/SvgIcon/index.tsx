@@ -17,6 +17,8 @@ import word from '@/assets/svg/file-word.svg';
 import excel from '@/assets/svg/file-excel.svg';
 import text from '@/assets/svg/file-text.svg';
 import video from '@/assets/svg/file-video.svg';
+import gif from '@/assets/svg/file-gif.svg';
+import ico from '@/assets/svg/file-ico.svg';
 
 export default function SvgIcon({fileName}: {fileName: string}) {
   const svgMap: {
@@ -44,6 +46,8 @@ export default function SvgIcon({fileName}: {fileName: string}) {
     txt: text,
     jpg: image,
     jpeg: image,
+    gif,
+    ico,
     svg,
     json,
     html,
