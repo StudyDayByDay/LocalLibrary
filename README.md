@@ -30,5 +30,5 @@
 ## 👀 界面一览
 
 <p align="center">
-  <img height="300px" src="./public/web.png">
+  <img height="500px" src="./public/web.png">
 </p>
