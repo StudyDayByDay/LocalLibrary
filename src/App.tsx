@@ -163,13 +163,26 @@ function App() {
   const [operateFlag, setOperateFlag] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const listenKeydown = (event: KeyboardEvent) => {
+    // 判断是否按下了 Ctrl 或者 Command 键
+    const isCtrlOrCmdPressed = event.ctrlKey || event.metaKey;
+
+    // 检查是否按下了 Command (Mac) 或 Ctrl (Windows) + S
+    if (isCtrlOrCmdPressed && event.key.toLowerCase() === 's') {
+      event.preventDefault(); // 阻止浏览器的默认保存行为
+    }
+
+    // 判断是否同时按下 Command (Mac) 或 Ctrl (Windows) + Shift 键和 'L' 键
+    if (isCtrlOrCmdPressed && event.shiftKey && event.key.toLowerCase() === 'l') {
+      // 阻止默认行为（如果需要）
+      event.preventDefault();
+      window.open(location.origin, '_blank');
+    }
+  };
+
   useEffect(() => {
-    document.addEventListener('keydown', function (event) {
-      // 检查是否按下了 Command (Mac) 或 Ctrl (Windows) + S
-      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-        event.preventDefault(); // 阻止浏览器的默认保存行为
-      }
-    });
+    document.addEventListener('keydown', listenKeydown);
+    // return document.removeEventListener('keydown', listenKeydown);
   }, []);
 
   // 选择初始文件
