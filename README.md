@@ -23,6 +23,7 @@
 - 🦩 媒体文件（图片、视频）预览功能
 - ✂️ 文档文件（docx、xls、xlsx、pdf）预览功能
 - 🪐 markdown 双栏编辑+预览功能
+- 📟 支持快捷键ctrl/command + shift + l打开新窗口
 - 📃 可用于 react 项目入门
 - ☝️ 欢迎提出需求和 bug
 - 🛠 更多特性开发中
