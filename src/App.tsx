@@ -176,7 +176,7 @@ function App() {
     if (isCtrlOrCmdPressed && event.shiftKey && event.key.toLowerCase() === 'l') {
       // 阻止默认行为（如果需要）
       event.preventDefault();
-      window.open(location.origin, '_blank');
+      window.open(location.href, '_blank');
     }
   };
 
