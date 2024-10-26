@@ -14,16 +14,16 @@
 ## ✨ 1.0 特性
 
 - 🛠 使用 TypeScript + React 编写
-- ✅ 读取文件夹形成文件树
+- ✅ 快速读取文件夹形成文件树
 - 🪐 支持代码编辑器
 - 💪 修改文件内容实时保存
 - 🐆 支持新建文件、文件夹
 - 🤟 支持选中后回车修改文件、文件夹
-- 🥇 支持选中后点击Backspace删除文件、文件夹
+- 🥇 支持选中后点击 Backspace 删除文件、文件夹
+- 🪐 markdown 双栏编辑+预览功能
 - 🦩 媒体文件（图片、视频）预览功能
 - ✂️ 文档文件（docx、xls、xlsx、pdf）预览功能
-- 🪐 markdown 双栏编辑+预览功能
-- 📟 支持快捷键ctrl/command + shift + l打开新窗口
+- 📟 支持快捷键 ctrl/command + shift + l 打开新窗口
 - 📃 可用于 react 项目入门
 - ☝️ 欢迎提出需求和 bug
 - 🛠 更多特性开发中
@@ -32,4 +32,14 @@
 
 <p align="center">
   <img height="450px" src="./public/web.png">
+</p>
+
+## 💎 演示视频
+
+<p align="center">
+  <!-- <video height="450px" src="./public/demonstration.mov"> -->
+  <video controls width="100%" height="100%">
+    <source src="./public/demonstration.mov" />
+    你的浏览器不支持视频标签。
+  </video>
 </p>
