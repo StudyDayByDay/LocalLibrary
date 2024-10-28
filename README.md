@@ -36,10 +36,4 @@
 
 ## 💎 演示视频
 
-<p align="center">
-  <!-- <video height="450px" src="./public/demonstration.mov"> -->
-  <video controls width="100%" height="100%">
-    <source src="./public/demonstration.mov" />
-    你的浏览器不支持视频标签。
-  </video>
-</p>
+https://github.com/user-attachments/assets/580b5b87-a8cb-44a9-95aa-b778611fa1d2
