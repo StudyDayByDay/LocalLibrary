@@ -4,7 +4,7 @@
 </p>
 
 <p align="center">
-  LocalLibrary是基于 React+TypeScript 实现的在线前端项目编辑器，能操作本地文件，同时具有媒体文件、文档文件的预览功能
+  LocalLibrary是基于 FileSystemHandle(BOM API) + monaco-editor 实现的在线前端项目编辑器，能操作本地文件，同时具有媒体文件、文档文件的预览功能
 </p>
 
 <p align="center">
