@@ -13,7 +13,7 @@
 
 ## ✨ 1.0 特性
 
-- 🛠 使用 TypeScript + React 编写
+- 🛠 基于FileSystemHandle(BOM API) + monaco-editor
 - ✅ 快速读取文件夹形成文件树
 - 🪐 支持代码编辑器
 - 💪 修改文件内容实时保存
@@ -24,7 +24,7 @@
 - 🦩 媒体文件（图片、视频）预览功能
 - ✂️ 文档文件（docx、xls、xlsx、pdf）预览功能
 - 📟 支持快捷键 ctrl/command + shift + l 打开新窗口
-- 📃 可用于 react 项目入门
+- 📃 可用于项目入门
 - ☝️ 欢迎提出需求和 bug
 - 🛠 更多特性开发中
 
